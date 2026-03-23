@@ -1,0 +1,820 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+    <title>สมุดคำศัพท์ส่วนตัว | แปลไทย อังกฤษ จีน + ใส่คำอ่านเองได้</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,300;14..32,400;14..32,500;14..32,600;14..32,700&display=swap" rel="stylesheet">
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
+    <style>
+        body { transition: background-color 0.2s, color 0.2s; }
+        .modal-backdrop {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background-color: rgba(0,0,0,0.5); display: flex; align-items: center;
+            justify-content: center; z-index: 50;
+        }
+        .modal-content { max-width: 90%; width: 500px; max-height: 90vh; overflow-y: auto; }
+        .btn-primary {
+            @apply bg-primary-600 hover:bg-primary-700 text-white font-semibold py-2 px-4 rounded-xl shadow-md transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:ring-offset-2 dark:focus:ring-offset-gray-800;
+        }
+        .btn-outline {
+            @apply border border-gray-300 dark:border-gray-600 bg-white/70 dark:bg-gray-800/70 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-xl px-3 py-2 transition;
+        }
+        .voice-btn, .translate-compact-btn {
+            @apply bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600 rounded-full p-2 transition;
+        }
+        .speaker-btn, .arrow-back-btn {
+            @apply text-gray-500 hover:text-primary-600 dark:text-gray-400 dark:hover:text-primary-400 transition p-1.5 rounded-full hover:bg-gray-100 dark:hover:bg-gray-700;
+        }
+        .save-btn-gradient {
+            background: linear-gradient(135deg, #10b981, #059669);
+            @apply text-white font-bold py-3 px-6 rounded-xl shadow-lg transition-all duration-200 text-base flex items-center gap-2 hover:shadow-xl hover:scale-105;
+        }
+        .reset-btn {
+            @apply bg-gray-200 dark:bg-gray-700 hover:bg-gray-300 dark:hover:bg-gray-600 text-gray-700 dark:text-gray-200 rounded-xl px-3 py-2 transition-all duration-200;
+        }
+        .google-btn {
+            @apply w-full flex items-center justify-center gap-2 bg-white text-gray-700 border border-gray-300 rounded-xl py-2 px-4 hover:bg-gray-50 transition dark:bg-gray-800 dark:text-gray-200 dark:border-gray-600 dark:hover:bg-gray-700;
+        }
+        /* Responsive arrow icons */
+        @media (max-width: 768px) {
+            .arrow-back-btn .arrow-left-icon { display: none; }
+            .arrow-back-btn .arrow-up-icon { display: inline-block; }
+        }
+        @media (min-width: 769px) {
+            .arrow-back-btn .arrow-left-icon { display: inline-block; }
+            .arrow-back-btn .arrow-up-icon { display: none; }
+        }
+        .arrow-back-btn .arrow-left-icon,
+        .arrow-back-btn .arrow-up-icon { font-size: 1rem; }
+        .compact-card {
+            padding: 1rem !important;
+        }
+        .compact-card .source-select {
+            margin-bottom: 0.75rem;
+        }
+        .compact-card textarea {
+            min-height: 80px;
+        }
+        .compact-card .action-row {
+            display: flex;
+            justify-content: flex-end;
+            gap: 0.5rem;
+            margin-top: 0.5rem;
+        }
+        .saved-card {
+            font-size: 0.95rem;
+        }
+        .saved-card .font-bold {
+            font-size: 1rem;
+        }
+        .saved-card .font-medium {
+            font-size: 0.9rem;
+        }
+        .search-wrapper {
+            position: relative;
+        }
+        .search-wrapper input {
+            padding-right: 2.5rem;
+        }
+        .clear-search {
+            position: absolute;
+            right: 0.75rem;
+            top: 50%;
+            transform: translateY(-50%);
+            cursor: pointer;
+            color: #9ca3af;
+            transition: color 0.2s;
+        }
+        .clear-search:hover {
+            color: #ef4444;
+        }
+    </style>
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    colors: {
+                        primary: {
+                            50: '#eef2ff', 100: '#e0e7ff', 200: '#c7d2fe', 300: '#a5b4fc',
+                            400: '#818cf8', 500: '#6366f1', 600: '#4f46e5', 700: '#4338ca',
+                            800: '#3730a3', 900: '#312e81', 950: '#1e1b4b',
+                        }
+                    },
+                    fontFamily: { 'sans': ['Inter', 'system-ui', 'sans-serif'] }
+                }
+            }
+        }
+    </script>
+</head>
+<body class="bg-gray-50 dark:bg-gray-900 text-gray-900 dark:text-gray-100 font-sans antialiased">
+
+<div id="main-content" class="max-w-7xl mx-auto px-4 sm:px-6 py-6 md:py-8">
+    <!-- Header -->
+    <div class="flex flex-wrap justify-between items-center mb-6 gap-3">
+        <div>
+            <h1 class="text-2xl md:text-3xl font-bold bg-gradient-to-r from-primary-600 to-primary-800 bg-clip-text text-transparent">📘 สมุดคำศัพท์ส่วนตัว</h1>
+            <p class="text-sm text-gray-500 dark:text-gray-400 mt-1">แปลไทย ↔ อังกฤษ ↔ จีน • บันทึกคำศัพท์ • ฟังเสียง • คลิกข้อความเพื่อแปลซ้ำ</p>
+        </div>
+        <div class="flex gap-2 items-center">
+            <button id="darkModeToggle" class="btn-outline rounded-full text-lg w-10 h-10 flex items-center justify-center shadow-sm">
+                <i class="fas fa-moon dark:fa-sun"></i>
+            </button>
+            <div id="authButtons" class="flex gap-2">
+                <button id="loginBtn" class="btn-outline px-3 py-2 text-sm">เข้าสู่ระบบ</button>
+                <button id="registerBtn" class="btn-primary px-3 py-2 text-sm">สมัครสมาชิก</button>
+            </div>
+            <div id="userInfo" class="hidden items-center gap-2">
+                <img id="userAvatar" class="w-8 h-8 rounded-full hidden">
+                <span id="userEmail" class="text-sm truncate max-w-[150px]"></span>
+                <button id="logoutBtn" class="btn-outline text-sm px-2 py-1">ออกจากระบบ</button>
+            </div>
+        </div>
+    </div>
+
+    <div class="flex flex-col lg:grid lg:grid-cols-2 gap-8">
+        <!-- ภาษาต้นทาง (กะทัดรัด) -->
+        <div class="order-1 lg:order-none lg:col-span-1 bg-white dark:bg-gray-800 rounded-2xl shadow-sm border border-gray-100 dark:border-gray-700 p-4 compact-card">
+            <div class="flex items-center gap-2 mb-2">
+                <label class="block text-sm font-medium flex items-center gap-2"><i class="fas fa-language text-primary-500"></i>ภาษาต้นทาง</label>
+                <button id="resetLangBtn" class="reset-btn text-xs py-1 px-2" title="รีเซ็ตภาษาเป็นอัตโนมัติและล้างข้อความ">
+                    <i class="fas fa-undo-alt"></i> รีเซ็ต
+                </button>
+            </div>
+            <select id="sourceLangSelect" class="w-full border border-gray-300 dark:border-gray-600 rounded-xl px-4 py-2 bg-white dark:bg-gray-700 focus:ring-2 focus:ring-primary-500 source-select">
+                <option value="auto" selected>🤖 อัตโนมัติ (Auto Detect)</option>
+                <option value="th">🇹🇭 ไทย (Thai)</option>
+                <option value="en">🇬🇧 อังกฤษ (English)</option>
+                <option value="zh">🇨🇳 จีน (Chinese)</option>
+            </select>
+            <div class="mt-2 relative">
+                <textarea id="inputText" rows="2" class="w-full border border-gray-300 dark:border-gray-600 rounded-xl p-3 bg-gray-50 dark:bg-gray-700/50 focus:ring-2 focus:ring-primary-400 resize-none" placeholder="พิมพ์หรือพูดข้อความ..."></textarea>
+            </div>
+            <div class="action-row">
+                <button id="voiceInputBtn" class="voice-btn" title="พูดป้อนข้อความ"><i class="fas fa-microphone text-lg"></i></button>
+                <button id="clearInputBtn" class="voice-btn text-gray-400 hover:text-gray-600" title="ล้างข้อความ"><i class="fas fa-eraser"></i></button>
+                <button id="translateBtn" class="btn-primary text-sm py-1.5 px-3 flex items-center gap-2 rounded-xl shadow-md">
+                    <i class="fas fa-language"></i> แปล
+                </button>
+            </div>
+            <div id="detectedLangInfo" class="text-xs text-gray-400 mt-2 hidden"></div>
+        </div>
+
+        <!-- ผลลัพธ์การแปล -->
+        <div class="order-2 lg:order-none lg:col-span-1 space-y-5">
+            <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-sm border border-gray-100 dark:border-gray-700 p-5">
+                <h3 class="font-semibold text-lg mb-3 flex items-center gap-2"><i class="fas fa-globe"></i> ผลลัพธ์การแปล</h3>
+                <div class="border border-gray-200 dark:border-gray-700 rounded-xl p-3 bg-gray-50/40 dark:bg-gray-800/50 space-y-3">
+                    <!-- ไทย -->
+                    <div class="flex flex-wrap items-start justify-between gap-2">
+                        <div class="flex items-center gap-2 flex-wrap">
+                            <span class="font-medium text-primary-600 dark:text-primary-400"><i class="fas fa-flag-checkered"></i> ไทย</span>
+                            <button class="arrow-back-btn" data-lang="th" data-text-id="thResult" title="นำข้อความนี้ไปแปลซ้ำ">
+                                <i class="fas fa-arrow-left arrow-left-icon"></i>
+                                <i class="fas fa-arrow-up arrow-up-icon"></i>
+                            </button>
+                        </div>
+                        <div class="flex gap-2">
+                            <button class="speaker-btn" data-lang="th" data-text-id="thResult"><i class="fas fa-volume-up"></i></button>
+                        </div>
+                        <p id="thResult" class="w-full text-gray-800 dark:text-gray-200 break-words mt-1">-</p>
+                    </div>
+                    <!-- อังกฤษ -->
+                    <div class="flex flex-wrap items-start justify-between gap-2">
+                        <div class="flex items-center gap-2 flex-wrap">
+                            <span class="font-medium text-primary-600 dark:text-primary-400"><i class="fas fa-language"></i> อังกฤษ</span>
+                            <button class="arrow-back-btn" data-lang="en" data-text-id="enResult" title="นำข้อความนี้ไปแปลซ้ำ">
+                                <i class="fas fa-arrow-left arrow-left-icon"></i>
+                                <i class="fas fa-arrow-up arrow-up-icon"></i>
+                            </button>
+                        </div>
+                        <div class="flex gap-2">
+                            <button class="speaker-btn" data-lang="en" data-text-id="enResult"><i class="fas fa-volume-up"></i></button>
+                        </div>
+                        <p id="enResult" class="w-full text-gray-800 dark:text-gray-200 break-words mt-1">-</p>
+                    </div>
+                    <!-- จีน -->
+                    <div class="flex flex-wrap items-start justify-between gap-2">
+                        <div class="flex items-center gap-2 flex-wrap">
+                            <span class="font-medium text-primary-600 dark:text-primary-400"><i class="fas fa-chinese-yuan"></i> จีน</span>
+                            <button class="arrow-back-btn" data-lang="zh" data-text-id="zhResult" title="นำข้อความนี้ไปแปลซ้ำ">
+                                <i class="fas fa-arrow-left arrow-left-icon"></i>
+                                <i class="fas fa-arrow-up arrow-up-icon"></i>
+                            </button>
+                        </div>
+                        <div class="flex gap-2">
+                            <button class="speaker-btn" data-lang="zh" data-text-id="zhResult"><i class="fas fa-volume-up"></i></button>
+                        </div>
+                        <p id="zhResult" class="w-full text-gray-800 dark:text-gray-200 break-words mt-1">-</p>
+                    </div>
+                </div>
+
+                <div class="mt-4 pt-3 border-t border-gray-200 dark:border-gray-700">
+                    <label class="block text-sm font-medium mb-1 flex items-center gap-2"><i class="fas fa-pen-alt text-primary-500"></i> คำอ่านภาษาไทย (ป้อนเอง)</label>
+                    <textarea id="customPronounceInput" rows="2" class="w-full border border-gray-300 dark:border-gray-600 rounded-xl p-2 bg-gray-50 dark:bg-gray-700/50 focus:ring-2 focus:ring-primary-400 resize-none" placeholder="เช่น สวัสดี อ่านว่า สะ-หวัด-ดี ..."></textarea>
+                    <p class="text-xs text-gray-400 mt-1">*คุณสามารถใส่คำอ่านที่ต้องการเอง ก่อนบันทึกคำศัพท์</p>
+                </div>
+
+                <div class="mt-5 flex justify-end">
+                    <button id="saveVocabularyBtn" class="save-btn-gradient"><i class="fas fa-save"></i> บันทึกคำศัพท์ชุดนี้</button>
+                </div>
+                <p class="text-xs text-gray-400 mt-2 text-right">*กดปุ่มลำโพงเพื่อฟังเสียง • กดปุ่มลูกศร (← บน PC, ↑ บนมือถือ) เพื่อนำข้อความไปแปลอีกครั้ง</p>
+            </div>
+        </div>
+
+        <!-- คำศัพท์ที่บันทึกไว้ -->
+        <div class="order-3 lg:order-none lg:col-span-1 bg-white dark:bg-gray-800 rounded-2xl shadow-sm border border-gray-100 dark:border-gray-700 p-5">
+            <div class="flex justify-between items-center mb-3">
+                <h3 class="font-bold text-lg flex items-center gap-2"><i class="fas fa-bookmark text-primary-500"></i> คำศัพท์ที่บันทึกไว้</h3>
+                <button id="clearAllHistoryBtn" class="text-xs text-red-500 hover:text-red-700 dark:text-red-400"><i class="fas fa-trash-alt"></i> ลบทั้งหมด</button>
+            </div>
+            <div class="mb-3 search-wrapper">
+                <i class="fas fa-search absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400"></i>
+                <input type="text" id="searchSaved" placeholder="ค้นหาคำศัพท์ (ข้อความต้นทาง / คำแปล / คำอ่าน)" 
+                       class="w-full pl-9 pr-8 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 focus:ring-2 focus:ring-primary-400">
+                <i id="clearSearchBtn" class="fas fa-times clear-search hidden cursor-pointer" title="ล้างข้อความค้นหา"></i>
+            </div>
+            <div id="savedEntriesContainer" class="space-y-3 max-h-[400px] overflow-y-auto pr-1">
+                <div class="text-center text-gray-400 py-6 text-sm">กำลังโหลดข้อมูล...</div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal Login/Register -->
+<div id="authModal" class="modal-backdrop hidden">
+    <div class="modal-content bg-white dark:bg-gray-800 rounded-2xl shadow-xl p-6 relative">
+        <div class="flex justify-between items-center mb-4">
+            <h3 id="authModalTitle" class="text-xl font-bold">เข้าสู่ระบบ</h3>
+            <button id="closeAuthModal" class="text-gray-500 hover:text-gray-700"><i class="fas fa-times text-xl"></i></button>
+        </div>
+        <form id="authForm">
+            <div class="mb-3">
+                <label class="block text-sm font-medium mb-1">อีเมล</label>
+                <input type="email" id="authEmail" class="w-full border rounded-lg p-2 dark:bg-gray-700" required>
+            </div>
+            <div class="mb-3">
+                <label class="block text-sm font-medium mb-1">รหัสผ่าน</label>
+                <input type="password" id="authPassword" class="w-full border rounded-lg p-2 dark:bg-gray-700" required>
+            </div>
+            <div class="flex justify-end gap-2 mt-4">
+                <button type="button" id="cancelAuthBtn" class="btn-outline px-4 py-2">ยกเลิก</button>
+                <button type="submit" id="submitAuthBtn" class="btn-primary px-4 py-2">เข้าสู่ระบบ</button>
+            </div>
+            <div id="authError" class="text-red-500 text-sm mt-2 hidden"></div>
+        </form>
+        <div class="relative my-4">
+            <div class="absolute inset-0 flex items-center"><div class="w-full border-t border-gray-300 dark:border-gray-600"></div></div>
+            <div class="relative flex justify-center text-sm"><span class="px-2 bg-white dark:bg-gray-800 text-gray-500">หรือ</span></div>
+        </div>
+        <button id="googleSignInBtn" class="google-btn"><i class="fab fa-google text-red-500"></i> เข้าสู่ระบบด้วย Google</button>
+        <div class="text-center text-sm text-gray-500 mt-3">
+            <span id="toggleAuthMode" class="text-primary-600 cursor-pointer hover:underline">ยังไม่มีบัญชี? สมัครสมาชิก</span>
+        </div>
+    </div>
+</div>
+
+<script>
+    // Firebase config
+    const firebaseConfig = {
+        apiKey: "AIzaSyBU9M5C5Q6yIdlvjEQsUpxcYOjHKV_JRc4",
+        authDomain: "fmpro-d66c3.firebaseapp.com",
+        projectId: "fmpro-d66c3",
+        storageBucket: "fmpro-d66c3.firebasestorage.app",
+        messagingSenderId: "1046027421115",
+        appId: "1:1046027421115:web:333a51f45fbf09c556309e",
+        measurementId: "G-KGGDYWYGNM"
+    };
+    firebase.initializeApp(firebaseConfig);
+    const auth = firebase.auth();
+    const db = firebase.firestore();
+    const googleProvider = new firebase.auth.GoogleAuthProvider();
+
+    // State
+    let currentUser = null;
+    let currentTranslations = { th: "", en: "", zh: "" };
+    let currentSourceText = "";
+    let currentSourceLang = "auto";
+    let searchQuery = "";
+    let allVocabularies = [];
+
+    // DOM elements
+    const sourceLangSelect = document.getElementById('sourceLangSelect');
+    const inputTextArea = document.getElementById('inputText');
+    const translateBtn = document.getElementById('translateBtn');
+    const voiceInputBtn = document.getElementById('voiceInputBtn');
+    const clearInputBtn = document.getElementById('clearInputBtn');
+    const saveVocabBtn = document.getElementById('saveVocabularyBtn');
+    const savedContainer = document.getElementById('savedEntriesContainer');
+    const clearHistoryBtn = document.getElementById('clearAllHistoryBtn');
+    const darkModeToggle = document.getElementById('darkModeToggle');
+    const customPronounceInput = document.getElementById('customPronounceInput');
+    const detectedLangInfo = document.getElementById('detectedLangInfo');
+    const searchInput = document.getElementById('searchSaved');
+    const clearSearchBtn = document.getElementById('clearSearchBtn');
+    const resetLangBtn = document.getElementById('resetLangBtn');
+
+    const thResultEl = document.getElementById('thResult');
+    const enResultEl = document.getElementById('enResult');
+    const zhResultEl = document.getElementById('zhResult');
+
+    // Auth elements
+    const authButtons = document.getElementById('authButtons');
+    const userInfo = document.getElementById('userInfo');
+    const userEmailSpan = document.getElementById('userEmail');
+    const userAvatar = document.getElementById('userAvatar');
+    const loginBtn = document.getElementById('loginBtn');
+    const registerBtn = document.getElementById('registerBtn');
+    const logoutBtn = document.getElementById('logoutBtn');
+    const googleSignInBtn = document.getElementById('googleSignInBtn');
+    const authModal = document.getElementById('authModal');
+    const authModalTitle = document.getElementById('authModalTitle');
+    const submitAuthBtn = document.getElementById('submitAuthBtn');
+    const authEmail = document.getElementById('authEmail');
+    const authPassword = document.getElementById('authPassword');
+    const authError = document.getElementById('authError');
+    const toggleAuthMode = document.getElementById('toggleAuthMode');
+    const closeAuthModal = document.getElementById('closeAuthModal');
+    const cancelAuthBtn = document.getElementById('cancelAuthBtn');
+    const authForm = document.getElementById('authForm');
+
+    // Cache
+    const CACHE_KEY = "translation_cache_v2";
+    let translationCache = {};
+    function loadCache() {
+        const stored = localStorage.getItem(CACHE_KEY);
+        if (stored) { try { translationCache = JSON.parse(stored); } catch(e) { translationCache = {}; } }
+    }
+    function saveCache() { localStorage.setItem(CACHE_KEY, JSON.stringify(translationCache)); }
+    function getCacheKey(text, srcLang, tgtLang) { return `${srcLang}|${tgtLang}|${text}`; }
+    function getCachedTranslation(text, srcLang, tgtLang) {
+        return translationCache[getCacheKey(text, srcLang, tgtLang)] || null;
+    }
+    function setCachedTranslation(text, srcLang, tgtLang, result) {
+        translationCache[getCacheKey(text, srcLang, tgtLang)] = result;
+        saveCache();
+    }
+
+    // Helpers
+    function detectLanguageBasic(text) {
+        if (/[\u0E00-\u0E7F]/.test(text)) return 'th';
+        if (/[\u4E00-\u9FFF]/.test(text)) return 'zh';
+        return 'en';
+    }
+    function toMyMemoryLangCode(lang) {
+        if (lang === 'th') return 'th';
+        if (lang === 'en') return 'en';
+        if (lang === 'zh') return 'zh-CN';
+        return 'en';
+    }
+
+    // Translation API (MyMemory)
+    async function translateWithMyMemory(text, sourceLang, targetLang, retry = 0) {
+        if (!text || text.trim() === "") return null;
+        const src = toMyMemoryLangCode(sourceLang);
+        const tgt = toMyMemoryLangCode(targetLang);
+        const url = `https://api.mymemory.translated.net/get?q=${encodeURIComponent(text)}&langpair=${src}|${tgt}`;
+        try {
+            const res = await fetch(url);
+            const data = await res.json();
+            if (data && data.responseData && data.responseData.translatedText) {
+                let translated = data.responseData.translatedText;
+                if (translated === text && src !== tgt && retry < 2) {
+                    await new Promise(r => setTimeout(r, 500));
+                    return translateWithMyMemory(text, sourceLang, targetLang, retry + 1);
+                }
+                setCachedTranslation(text, sourceLang, targetLang, translated);
+                return translated;
+            }
+            return null;
+        } catch(e) { return null; }
+    }
+
+    async function translateText(text, sourceLang, targetLang) {
+        if (!text) return "";
+        const cached = getCachedTranslation(text, sourceLang, targetLang);
+        if (cached !== null) return cached;
+        const result = await translateWithMyMemory(text, sourceLang, targetLang);
+        return result !== null ? result : null;
+    }
+
+    async function performFullTranslation(sourceText, sourceLangChoice) {
+        if (!sourceText.trim()) return { th: "", en: "", zh: "" };
+        let actualSourceLang = sourceLangChoice;
+        if (actualSourceLang === 'auto') {
+            actualSourceLang = detectLanguageBasic(sourceText);
+            const langName = actualSourceLang === 'th' ? 'ไทย' : (actualSourceLang === 'en' ? 'อังกฤษ' : 'จีน');
+            window.detectedLangMessage = `🔍 ตรวจพบภาษา: ${langName}`;
+        } else {
+            window.detectedLangMessage = null;
+        }
+
+        let thResult, enResult, zhResult;
+        if (actualSourceLang === 'th') {
+            thResult = sourceText;
+            enResult = await translateText(sourceText, 'th', 'en');
+            zhResult = await translateText(sourceText, 'th', 'zh');
+        } else if (actualSourceLang === 'en') {
+            enResult = sourceText;
+            thResult = await translateText(sourceText, 'en', 'th');
+            zhResult = await translateText(sourceText, 'en', 'zh');
+        } else {
+            zhResult = sourceText;
+            thResult = await translateText(sourceText, 'zh', 'th');
+            enResult = await translateText(sourceText, 'zh', 'en');
+        }
+
+        return {
+            th: thResult === null ? "⚠️ ไม่สามารถแปลได้" : (thResult || ""),
+            en: enResult === null ? "⚠️ ไม่สามารถแปลได้" : (enResult || ""),
+            zh: zhResult === null ? "⚠️ ไม่สามารถแปลได้" : (zhResult || "")
+        };
+    }
+
+    async function handleTranslation() {
+        const rawText = inputTextArea.value.trim();
+        if (!rawText) { alert("กรุณาพิมพ์หรือพูดข้อความก่อนแปล"); return; }
+        currentSourceText = rawText;
+        currentSourceLang = sourceLangSelect.value;
+        translateBtn.disabled = true;
+        translateBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i>';
+        try {
+            const translated = await performFullTranslation(rawText, currentSourceLang);
+            currentTranslations = translated;
+            thResultEl.innerText = translated.th || "-";
+            enResultEl.innerText = translated.en || "-";
+            zhResultEl.innerText = translated.zh || "-";
+            if (window.detectedLangMessage) {
+                detectedLangInfo.textContent = window.detectedLangMessage;
+                detectedLangInfo.classList.remove('hidden');
+            } else detectedLangInfo.classList.add('hidden');
+        } catch (err) {
+            alert("เกิดข้อผิดพลาดในการแปล");
+        } finally {
+            translateBtn.disabled = false;
+            translateBtn.innerHTML = '<i class="fas fa-language"></i> แปล';
+        }
+    }
+
+    // TTS
+    function speakText(text, langCode) {
+        if (!window.speechSynthesis) return;
+        window.speechSynthesis.cancel();
+        const utterance = new SpeechSynthesisUtterance(text);
+        if (langCode === 'th') utterance.lang = 'th-TH';
+        else if (langCode === 'en') utterance.lang = 'en-US';
+        else if (langCode === 'zh') utterance.lang = 'zh-CN';
+        utterance.rate = 0.9;
+        window.speechSynthesis.speak(utterance);
+    }
+    function attachEvents() {
+        document.querySelectorAll('.speaker-btn').forEach(btn => {
+            btn.removeEventListener('click', speakerHandler);
+            btn.addEventListener('click', speakerHandler);
+        });
+        document.querySelectorAll('.arrow-back-btn').forEach(btn => {
+            btn.removeEventListener('click', arrowBackHandler);
+            btn.addEventListener('click', arrowBackHandler);
+        });
+    }
+    function speakerHandler(e) {
+        const btn = e.currentTarget;
+        const lang = btn.getAttribute('data-lang');
+        const textId = btn.getAttribute('data-text-id');
+        const textElem = document.getElementById(textId);
+        if (textElem && textElem.innerText && textElem.innerText !== '-') speakText(textElem.innerText, lang);
+    }
+    async function arrowBackHandler(e) {
+        const btn = e.currentTarget;
+        const lang = btn.getAttribute('data-lang');
+        const textId = btn.getAttribute('data-text-id');
+        const textElem = document.getElementById(textId);
+        if (textElem && textElem.innerText && textElem.innerText !== '-') {
+            inputTextArea.value = textElem.innerText;
+            sourceLangSelect.value = lang;
+            await handleTranslation();
+        }
+    }
+
+    // Firebase storage
+    function updateAuthUI(user) {
+        if (user) {
+            authButtons.classList.add('hidden');
+            userInfo.classList.remove('hidden');
+            userEmailSpan.textContent = user.email;
+            if (user.photoURL) {
+                userAvatar.src = user.photoURL;
+                userAvatar.classList.remove('hidden');
+            } else userAvatar.classList.add('hidden');
+            currentUser = user;
+            loadUserVocabularies();
+        } else {
+            authButtons.classList.remove('hidden');
+            userInfo.classList.add('hidden');
+            currentUser = null;
+            allVocabularies = [];
+            renderSavedList();
+            savedContainer.innerHTML = '<div class="text-center text-gray-400 py-6 text-sm">กรุณาเข้าสู่ระบบเพื่อดูคำศัพท์ที่บันทึกไว้</div>';
+        }
+    }
+
+    async function loadUserVocabularies() {
+        if (!currentUser) return;
+        savedContainer.innerHTML = '<div class="text-center text-gray-400 py-6 text-sm">กำลังโหลด...</div>';
+        try {
+            const snapshot = await db.collection('users').doc(currentUser.uid).collection('vocabularies').orderBy('timestamp', 'desc').get();
+            allVocabularies = [];
+            snapshot.forEach(doc => allVocabularies.push({ id: doc.id, ...doc.data() }));
+            renderSavedList();
+        } catch(e) { console.error(e); }
+    }
+    async function addVocabularyToFirestore(entry) {
+        if (!currentUser) return;
+        const docRef = await db.collection('users').doc(currentUser.uid).collection('vocabularies').add({
+            ...entry,
+            timestamp: firebase.firestore.FieldValue.serverTimestamp()
+        });
+        entry.id = docRef.id;
+        allVocabularies.unshift(entry);
+        renderSavedList();
+    }
+    async function deleteVocabularyFromFirestore(id) {
+        if (!currentUser) return;
+        if (!confirm("คุณต้องการลบคำศัพท์นี้ใช่หรือไม่?")) return;
+        await db.collection('users').doc(currentUser.uid).collection('vocabularies').doc(id).delete();
+        allVocabularies = allVocabularies.filter(v => v.id !== id);
+        renderSavedList();
+    }
+    async function updateVocabularyInFirestore(id, data) {
+        if (!currentUser) return;
+        await db.collection('users').doc(currentUser.uid).collection('vocabularies').doc(id).update(data);
+        const idx = allVocabularies.findIndex(v => v.id === id);
+        if (idx !== -1) { allVocabularies[idx] = { ...allVocabularies[idx], ...data }; renderSavedList(); }
+    }
+    async function clearAllVocabularies() {
+        if (!currentUser) return;
+        if (!confirm("คุณต้องการลบคำศัพท์ทั้งหมดใช่หรือไม่? การดำเนินการนี้ไม่สามารถกู้คืนได้")) return;
+        const batch = db.batch();
+        const snapshot = await db.collection('users').doc(currentUser.uid).collection('vocabularies').get();
+        snapshot.forEach(doc => batch.delete(doc.ref));
+        await batch.commit();
+        allVocabularies = [];
+        renderSavedList();
+    }
+
+    function renderSavedList() {
+        if (!savedContainer) return;
+        if (!currentUser) {
+            savedContainer.innerHTML = '<div class="text-center text-gray-400 py-6 text-sm">กรุณาเข้าสู่ระบบเพื่อดูคำศัพท์ที่บันทึกไว้</div>';
+            return;
+        }
+        const filtered = allVocabularies.filter(item => {
+            if (!searchQuery) return true;
+            const q = searchQuery.toLowerCase();
+            return [item.sourceText, item.th, item.en, item.zh, item.customPronounce].some(f => f && f.toLowerCase().includes(q));
+        });
+        if (filtered.length === 0) {
+            savedContainer.innerHTML = '<div class="text-center text-gray-400 py-6 text-sm">ไม่พบคำศัพท์ที่ค้นหา</div>';
+            return;
+        }
+        savedContainer.innerHTML = "";
+        filtered.forEach(item => {
+            const card = document.createElement('div');
+            card.className = "bg-gray-50 dark:bg-gray-700/40 rounded-xl p-3 border border-gray-200 dark:border-gray-700 text-sm saved-card";
+            let sourceLangDisplay = item.sourceLang;
+            if (sourceLangDisplay === 'auto') sourceLangDisplay = detectLanguageBasic(item.sourceText);
+            const sourceHtml = `
+                <div class="flex justify-between items-start gap-2 mb-2">
+                    <div class="flex-1 font-bold text-primary-700 dark:text-primary-300 break-words">📌 ${escapeHtml(item.sourceText)}</div>
+                    <div class="flex gap-1 flex-shrink-0">
+                        <button class="history-speaker-btn" data-text="${escapeAttr(item.sourceText)}" data-lang="${sourceLangDisplay}"><i class="fas fa-volume-up"></i></button>
+                    </div>
+                </div>
+            `;
+            const allLangs = [
+                { label: "🇹🇭 ไทย", code: "th", text: item.th },
+                { label: "🇬🇧 อังกฤษ", code: "en", text: item.en },
+                { label: "🇨🇳 จีน", code: "zh", text: item.zh }
+            ];
+            const filteredLangs = allLangs.filter(l => l.code !== sourceLangDisplay);
+            let langHtml = '';
+            filteredLangs.forEach(lang => {
+                const txt = lang.text || "-";
+                langHtml += `
+                    <div class="flex justify-between items-start gap-2 mt-1">
+                        <span class="font-medium min-w-[60px]">${lang.label}:</span>
+                        <span class="flex-1 break-words">${escapeHtml(txt)}</span>
+                        <div class="flex gap-1 flex-shrink-0">
+                            <button class="history-speaker-btn" data-text="${escapeAttr(txt)}" data-lang="${lang.code}"><i class="fas fa-volume-up"></i></button>
+                        </div>
+                    </div>
+                `;
+            });
+            const pronounceHtml = item.customPronounce ? `
+                <div class="text-gray-500 text-xs mt-1 flex justify-between items-center">
+                    <span><i class="fas fa-pen-alt"></i> คำอ่าน: ${escapeHtml(item.customPronounce)}</span>
+                    <button class="history-speaker-btn" data-text="${escapeAttr(item.customPronounce)}" data-lang="th"><i class="fas fa-volume-up"></i></button>
+                </div>
+            ` : '';
+            const btnHtml = `
+                <div class="flex justify-end gap-2 mt-2">
+                    <button class="edit-entry text-blue-500 hover:text-blue-700 text-xs" data-id="${item.id}"><i class="fas fa-edit"></i> แก้ไข</button>
+                    <button class="delete-entry text-red-400 hover:text-red-600 text-xs" data-id="${item.id}"><i class="fas fa-trash-alt"></i> ลบ</button>
+                </div>
+            `;
+            card.innerHTML = sourceHtml + `<div class="mt-1">${langHtml}</div>` + pronounceHtml + btnHtml;
+            savedContainer.appendChild(card);
+        });
+        document.querySelectorAll('.history-speaker-btn').forEach(btn => {
+            btn.removeEventListener('click', e => speakText(btn.getAttribute('data-text'), btn.getAttribute('data-lang')));
+            btn.addEventListener('click', e => speakText(btn.getAttribute('data-text'), btn.getAttribute('data-lang')));
+        });
+        document.querySelectorAll('.delete-entry').forEach(btn => {
+            btn.removeEventListener('click', e => deleteVocabularyFromFirestore(btn.getAttribute('data-id')));
+            btn.addEventListener('click', e => deleteVocabularyFromFirestore(btn.getAttribute('data-id')));
+        });
+        document.querySelectorAll('.edit-entry').forEach(btn => {
+            btn.addEventListener('click', async e => {
+                const id = btn.getAttribute('data-id');
+                const item = allVocabularies.find(v => v.id === id);
+                if (!item) return;
+                if (!confirm("คุณต้องการแก้ไขคำศัพท์นี้ใช่หรือไม่?")) return;
+                const newSrc = prompt("แก้ไขข้อความต้นทาง:", item.sourceText);
+                if (newSrc === null) return;
+                const newTh = prompt("แก้ไขภาษาไทย:", item.th);
+                if (newTh === null) return;
+                const newEn = prompt("แก้ไขภาษาอังกฤษ:", item.en);
+                if (newEn === null) return;
+                const newZh = prompt("แก้ไขภาษาจีน:", item.zh);
+                if (newZh === null) return;
+                const newPron = prompt("แก้ไขคำอ่านภาษาไทย:", item.customPronounce || "");
+                if (newPron === null) return;
+                await updateVocabularyInFirestore(id, {
+                    sourceText: newSrc.trim(), th: newTh.trim(), en: newEn.trim(), zh: newZh.trim(),
+                    customPronounce: newPron.trim(), timestamp: firebase.firestore.FieldValue.serverTimestamp()
+                });
+            });
+        });
+    }
+
+    async function saveCurrentVocabulary() {
+        if (!currentUser) { alert("กรุณาเข้าสู่ระบบก่อนบันทึก"); return; }
+        if (!currentTranslations.th && !currentTranslations.en && !currentTranslations.zh) { alert("ไม่มีข้อมูลคำแปลให้บันทึก"); return; }
+        if (!currentSourceText.trim()) return;
+        if (!confirm("คุณต้องการบันทึกคำศัพท์ชุดนี้ใช่หรือไม่?")) return;
+        await addVocabularyToFirestore({
+            sourceText: currentSourceText, sourceLang: currentSourceLang,
+            th: currentTranslations.th, en: currentTranslations.en, zh: currentTranslations.zh,
+            customPronounce: customPronounceInput.value.trim(),
+            timestamp: new Date().toISOString()
+        });
+        customPronounceInput.value = "";
+        const btn = saveVocabBtn;
+        const orig = btn.innerHTML;
+        btn.innerHTML = '<i class="fas fa-check"></i> บันทึกแล้ว!';
+        setTimeout(() => btn.innerHTML = orig, 1500);
+    }
+
+    // Reset function
+    function resetLanguageAndText() {
+        if (confirm("รีเซ็ตภาษาเป็นอัตโนมัติและล้างข้อความที่พิมพ์?")) {
+            sourceLangSelect.value = 'auto';
+            inputTextArea.value = '';
+            detectedLangInfo.classList.add('hidden');
+            // Optional: clear current translations display
+            thResultEl.innerText = '-';
+            enResultEl.innerText = '-';
+            zhResultEl.innerText = '-';
+            currentTranslations = { th: "", en: "", zh: "" };
+            currentSourceText = "";
+            currentSourceLang = "auto";
+        }
+    }
+    resetLangBtn.addEventListener('click', resetLanguageAndText);
+
+    // Speech recognition
+    let recognition = null;
+    function initSpeechRecognition() {
+        if (!('webkitSpeechRecognition' in window)) {
+            voiceInputBtn.style.opacity = "0.5";
+            voiceInputBtn.title = "เบราว์เซอร์ไม่รองรับ";
+            return;
+        }
+        const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+        recognition = new SpeechRecognition();
+        recognition.interimResults = false;
+        voiceInputBtn.addEventListener('click', () => {
+            if (!recognition) return;
+            const sel = sourceLangSelect.value;
+            if (sel === 'th') recognition.lang = 'th-TH';
+            else if (sel === 'en') recognition.lang = 'en-US';
+            else if (sel === 'zh') recognition.lang = 'zh-CN';
+            else recognition.lang = 'th-TH';
+            recognition.start();
+            voiceInputBtn.innerHTML = '<i class="fas fa-microphone-slash text-red-500"></i>';
+        });
+        recognition.onresult = (e) => {
+            inputTextArea.value = e.results[0][0].transcript;
+            voiceInputBtn.innerHTML = '<i class="fas fa-microphone"></i>';
+        };
+        recognition.onerror = () => { voiceInputBtn.innerHTML = '<i class="fas fa-microphone"></i>'; alert("ไม่สามารถรับเสียงได้"); };
+        recognition.onend = () => { voiceInputBtn.innerHTML = '<i class="fas fa-microphone"></i>'; };
+    }
+
+    // Dark mode
+    function initDarkMode() {
+        if (localStorage.getItem('theme') === 'dark' || (!localStorage.getItem('theme') && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
+            document.documentElement.classList.add('dark');
+        }
+        darkModeToggle.addEventListener('click', () => {
+            document.documentElement.classList.toggle('dark');
+            localStorage.setItem('theme', document.documentElement.classList.contains('dark') ? 'dark' : 'light');
+        });
+    }
+
+    // Auth modal
+    function openAuthModal(login = true) {
+        isLoginMode = login;
+        authModalTitle.textContent = login ? "เข้าสู่ระบบ" : "สมัครสมาชิก";
+        submitAuthBtn.textContent = login ? "เข้าสู่ระบบ" : "สมัครสมาชิก";
+        toggleAuthMode.textContent = login ? "ยังไม่มีบัญชี? สมัครสมาชิก" : "มีบัญชีอยู่แล้ว? เข้าสู่ระบบ";
+        authEmail.value = "";
+        authPassword.value = "";
+        authError.classList.add('hidden');
+        authModal.classList.remove('hidden');
+    }
+    function closeModal() { authModal.classList.add('hidden'); }
+    async function handleAuthSubmit(e) {
+        e.preventDefault();
+        const email = authEmail.value.trim();
+        const password = authPassword.value;
+        authError.classList.add('hidden');
+        try {
+            if (isLoginMode) await auth.signInWithEmailAndPassword(email, password);
+            else await auth.createUserWithEmailAndPassword(email, password);
+            closeModal();
+        } catch (err) {
+            authError.textContent = err.message;
+            authError.classList.remove('hidden');
+        }
+    }
+    async function handleGoogleSignIn() {
+        try {
+            await auth.signInWithPopup(googleProvider);
+            closeModal();
+        } catch(e) { alert("Google sign-in failed: " + e.message); }
+    }
+    let isLoginMode = true;
+
+    function escapeHtml(s) { if (!s) return ''; return s.replace(/[&<>]/g, m => ({'&':'&amp;','<':'&lt;','>':'&gt;'}[m])); }
+    function escapeAttr(s) { if (!s) return ''; return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
+
+    // Search clear button
+    function updateClearSearchButton() {
+        if (searchInput.value.trim().length > 0) {
+            clearSearchBtn.classList.remove('hidden');
+        } else {
+            clearSearchBtn.classList.add('hidden');
+        }
+    }
+    searchInput.addEventListener('input', (e) => {
+        searchQuery = e.target.value;
+        updateClearSearchButton();
+        renderSavedList();
+    });
+    clearSearchBtn.addEventListener('click', () => {
+        searchInput.value = '';
+        searchQuery = '';
+        updateClearSearchButton();
+        renderSavedList();
+    });
+
+    // Init
+    loadCache();
+    initDarkMode();
+    initSpeechRecognition();
+    attachEvents();
+    auth.onAuthStateChanged(updateAuthUI);
+    loginBtn.addEventListener('click', () => openAuthModal(true));
+    registerBtn.addEventListener('click', () => openAuthModal(false));
+    logoutBtn.addEventListener('click', () => auth.signOut());
+    googleSignInBtn.addEventListener('click', handleGoogleSignIn);
+    closeAuthModal.addEventListener('click', closeModal);
+    cancelAuthBtn.addEventListener('click', closeModal);
+    authForm.addEventListener('submit', handleAuthSubmit);
+    toggleAuthMode.addEventListener('click', () => openAuthModal(!isLoginMode));
+    clearInputBtn.addEventListener('click', () => { inputTextArea.value = ''; detectedLangInfo.classList.add('hidden'); });
+    translateBtn.addEventListener('click', handleTranslation);
+    saveVocabBtn.addEventListener('click', saveCurrentVocabulary);
+    clearHistoryBtn.addEventListener('click', clearAllVocabularies);
+    const observer = new MutationObserver(() => attachEvents());
+    observer.observe(document.getElementById('main-content'), { childList: true, subtree: true });
+    updateClearSearchButton();
+</script>
+</body>
+</html>
