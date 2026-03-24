@@ -125,6 +125,16 @@
             -webkit-box-orient: vertical;  
             overflow: hidden;
         }
+
+        textarea {
+            overflow-y: hidden;
+            resize: none;
+            min-height: 60px;
+        }
+        
+        .notes-container {
+            min-height: 400px;
+        }
     </style>
 </head>
 <body class="text-gray-700 min-h-screen relative pb-6">
@@ -139,7 +149,7 @@
                 <div class="flex items-center gap-2">
                     <h1 id="appTitle" class="text-2xl md:text-3xl font-bold text-rose-500 tracking-wide outline-none border-b-2 border-transparent focus:border-rose-300 transition-colors w-full max-w-[300px] truncate" contenteditable="false">My Notebook 🌸</h1>
                     <button id="editTitleBtn" class="text-pink-300 hover:text-pink-500 bg-white hover:bg-pink-50 rounded-full w-8 h-8 flex items-center justify-center transition shadow-sm border border-pink-100" title="เปลี่ยนชื่อแอป">
-                        <i class="fas fa-pen text-xs"></i>
+                        <i class="fas fa-pen text-xs pointer-events-none"></i>
                     </button>
                 </div>
                 <p class="text-sm text-pink-400 font-medium mt-1">สมุดจดบันทึกส่วนตัว สไตล์คิวท์ๆ</p>
@@ -172,14 +182,14 @@
                     <div class="flex items-center gap-2">
                         <div id="categoryActions" class="hidden flex gap-1">
                             <button onclick="openEditCategoryModal()" class="w-8 h-8 rounded-full bg-blue-50 text-blue-400 hover:text-blue-600 hover:bg-blue-100 transition shadow-sm" title="แก้ไขสมุด (ชื่อและไอคอน)">
-                                <i class="fas fa-edit"></i>
+                                <i class="fas fa-edit pointer-events-none"></i>
                             </button>
                             <button onclick="deleteCategory()" class="w-8 h-8 rounded-full bg-red-50 text-red-400 hover:text-red-600 hover:bg-red-100 transition shadow-sm" title="ลบสมุดทิ้ง">
-                                <i class="fas fa-trash-alt"></i>
+                                <i class="fas fa-trash-alt pointer-events-none"></i>
                             </button>
                         </div>
                         <button id="addCategoryBtn" class="text-sm bg-pink-100 hover:bg-pink-200 px-4 py-1.5 rounded-full flex items-center gap-2 text-pink-600 font-medium transition-colors shadow-sm">
-                            <i class="fas fa-plus"></i> เพิ่ม
+                            <i class="fas fa-plus pointer-events-none"></i> เพิ่ม
                         </button>
                     </div>
                 </div>
@@ -196,13 +206,13 @@
                     <div class="mb-4">
                         <label class="block text-sm font-medium mb-2 text-gray-600">หัวข้อหลัก <span class="text-rose-500">*</span></label>
                         <div class="relative flex items-center">
-                            <input type="text" id="mainTitleField" required class="w-full border-2 border-pink-100 rounded-2xl p-3 pr-20 bg-white focus:outline-none focus:border-pink-400 font-medium text-lg placeholder-pink-200" placeholder="พิมพ์หรือพูดหัวข้อ...">
-                            <div class="absolute right-3 flex gap-2">
-                                <button type="button" class="speaker-btn text-gray-400 hover:text-blue-500 text-lg transition-colors" data-target="mainTitleField" title="อ่านออกเสียง">
-                                    <i class="fas fa-volume-up"></i>
+                            <input type="text" id="mainTitleField" required class="w-full border-2 border-pink-100 rounded-2xl p-3 pr-24 bg-white focus:outline-none focus:border-pink-400 font-medium text-lg placeholder-pink-200" placeholder="พิมพ์หรือพูดหัวข้อ...">
+                            <div class="absolute right-3 flex gap-4">
+                                <button type="button" class="speaker-btn text-gray-400 hover:text-blue-500 text-lg transition-colors" data-target="mainTitleField" title="อ่านออกเสียง / หยุด">
+                                    <i class="fas fa-volume-up pointer-events-none"></i>
                                 </button>
                                 <button type="button" class="mic-btn text-gray-400 hover:text-pink-500 text-lg transition-colors" data-target="mainTitleField" title="พิมพ์ด้วยเสียง">
-                                    <i class="fas fa-microphone"></i>
+                                    <i class="fas fa-microphone pointer-events-none"></i>
                                 </button>
                             </div>
                         </div>
@@ -211,13 +221,13 @@
                     <div class="mb-5">
                         <label class="block text-sm font-medium mb-2 text-gray-600">หมวดหมู่ย่อย <span class="text-xs text-gray-400 font-normal">(ไม่จำเป็นต้องใส่)</span></label>
                         <div class="relative flex items-center">
-                            <input type="text" id="subCategoryField" list="subCategoryList" class="w-full border-2 border-pink-100 rounded-2xl p-2.5 pr-20 bg-white focus:outline-none focus:border-pink-400 font-medium text-sm placeholder-pink-200" placeholder="เช่น สี, สัตว์, เดือน...">
-                            <div class="absolute right-3 flex gap-2">
-                                <button type="button" class="speaker-btn text-gray-400 hover:text-blue-500 text-base transition-colors" data-target="subCategoryField" title="อ่านออกเสียง">
-                                    <i class="fas fa-volume-up"></i>
+                            <input type="text" id="subCategoryField" list="subCategoryList" class="w-full border-2 border-pink-100 rounded-2xl p-2.5 pr-24 bg-white focus:outline-none focus:border-pink-400 font-medium text-sm placeholder-pink-200" placeholder="เช่น สี, สัตว์, เดือน...">
+                            <div class="absolute right-3 flex gap-4">
+                                <button type="button" class="speaker-btn text-gray-400 hover:text-blue-500 text-base transition-colors" data-target="subCategoryField" title="อ่านออกเสียง / หยุด">
+                                    <i class="fas fa-volume-up pointer-events-none"></i>
                                 </button>
                                 <button type="button" class="mic-btn text-gray-400 hover:text-pink-500 text-base transition-colors" data-target="subCategoryField" title="พิมพ์ด้วยเสียง">
-                                    <i class="fas fa-microphone"></i>
+                                    <i class="fas fa-microphone pointer-events-none"></i>
                                 </button>
                             </div>
                         </div>
@@ -230,12 +240,12 @@
                         <label class="block text-sm font-medium mb-2 text-gray-600">แนบรูปภาพ</label>
                         <input type="file" id="imageInput" accept="image/*" class="hidden">
                         <button type="button" id="triggerImageBtn" class="w-full border-2 border-dashed border-pink-200 hover:bg-pink-50 text-pink-500 rounded-2xl py-3 flex justify-center items-center gap-2 transition-colors">
-                            <i class="fas fa-image"></i> เลือกรูปภาพ
+                            <i class="fas fa-image pointer-events-none"></i> เลือกรูปภาพ
                         </button>
                         <div id="imagePreviewContainer" class="relative hidden mt-3">
                             <img id="imagePreview" class="w-full h-32 object-cover rounded-2xl border-2 border-pink-100 shadow-sm" src="" alt="Preview">
                             <button type="button" id="removeImageBtn" class="absolute top-2 right-2 bg-red-500 hover:bg-red-600 text-white rounded-full w-8 h-8 flex items-center justify-center shadow-md transform hover:scale-110" title="ลบรูปภาพ">
-                                <i class="fas fa-times"></i>
+                                <i class="fas fa-times pointer-events-none"></i>
                             </button>
                         </div>
                     </div>
@@ -245,7 +255,7 @@
                     <div class="mb-2 flex justify-between items-center">
                         <label class="block text-sm font-medium text-gray-600">รายละเอียด</label>
                         <button type="button" id="addDynamicFieldBtn" class="text-xs bg-pink-50 hover:bg-pink-100 text-pink-600 px-3 py-1 rounded-full flex items-center gap-1 transition-colors">
-                            <i class="fas fa-plus-circle"></i> เพิ่มช่อง
+                            <i class="fas fa-plus-circle pointer-events-none"></i> เพิ่มช่อง
                         </button>
                     </div>
                     
@@ -254,13 +264,13 @@
                     
                     <div class="flex justify-between items-center gap-2 mt-6">
                         <button type="button" id="clearFormBtn" class="flex-1 bg-white border-2 border-orange-200 hover:bg-orange-50 text-orange-500 py-3 rounded-2xl flex justify-center items-center gap-2 font-medium transition-all shadow-sm">
-                            <i class="fas fa-eraser"></i> ล้าง
+                            <i class="fas fa-eraser pointer-events-none"></i> ล้าง
                         </button>
                         <button type="button" id="cancelEditBtn" class="hidden flex-1 bg-white border-2 border-gray-200 hover:bg-gray-50 text-gray-500 py-3 rounded-2xl flex justify-center items-center gap-2 font-medium transition-all shadow-sm">
-                            <i class="fas fa-times"></i> ยกเลิก
+                            <i class="fas fa-times pointer-events-none"></i> ยกเลิก
                         </button>
                         <button type="submit" class="flex-[1.5] bg-gradient-to-r from-emerald-400 to-teal-400 text-white py-3 rounded-2xl flex justify-center items-center gap-2 font-medium transition-all shadow-lg transform hover:scale-105">
-                            <i class="fas fa-save"></i> <span id="submitBtnText">บันทึก</span>
+                            <i class="fas fa-save pointer-events-none"></i> <span id="submitBtnText">บันทึก</span>
                         </button>
                     </div>
                 </form>
@@ -271,28 +281,34 @@
                     <i class="fas fa-language"></i> แปลภาษา & ออกเสียง
                 </h3>
                 <div class="relative mb-3 flex items-center">
-                    <textarea id="autoTranslateInput" rows="2" class="w-full border-2 border-pink-100 rounded-2xl p-3 pr-16 bg-white focus:outline-none focus:border-pink-400 resize-none text-sm" placeholder="พิมพ์..."></textarea>
-                    <div class="absolute right-2 top-3 flex gap-2">
-                        <button type="button" class="speaker-btn text-gray-400 hover:text-blue-500 transition-colors" data-target="autoTranslateInput" title="อ่านออกเสียง">
-                            <i class="fas fa-volume-up"></i>
+                    <textarea id="autoTranslateInput" rows="2" class="w-full border-2 border-pink-100 rounded-2xl p-3 pr-24 bg-white focus:outline-none focus:border-pink-400 resize-none text-sm" placeholder="พิมพ์หรือพูดเพื่อแปล..."></textarea>
+                    <div class="absolute right-3 top-3 flex gap-4">
+                        <button type="button" class="speaker-btn text-gray-400 hover:text-blue-500 transition-colors" data-target="autoTranslateInput" title="อ่านออกเสียง / หยุด">
+                            <i class="fas fa-volume-up pointer-events-none"></i>
                         </button>
                         <button type="button" class="mic-btn text-gray-400 hover:text-pink-500 transition-colors" data-target="autoTranslateInput" title="พิมพ์ด้วยเสียง">
-                            <i class="fas fa-microphone"></i>
+                            <i class="fas fa-microphone pointer-events-none"></i>
                         </button>
                     </div>
                 </div>
                 <div class="space-y-2 mt-3 text-sm">
                     <div class="bg-blue-50 p-3 rounded-xl border border-blue-100 relative min-h-[48px] flex items-center">
-                        <div class="flex-1 pr-8"><span class="font-medium text-blue-600">🇬🇧 </span><span id="autoEnResult">-</span></div>
-                        <button class="absolute right-3 text-blue-400 hover:text-blue-600 w-8 h-8 rounded-full" onclick="speakTextFromElement('autoEnResult', 'en-US')"><i class="fas fa-volume-up"></i></button>
+                        <div class="flex-1 pr-12"><span class="font-medium text-blue-600">🇬🇧 </span><span id="autoEnResult">-</span></div>
+                        <button type="button" class="speaker-btn absolute right-3 text-blue-400 hover:text-blue-600 w-8 h-8 rounded-full" data-target="autoEnResult" data-lang="en-US" title="อ่านคำแปลภาษาอังกฤษ">
+                            <i class="fas fa-volume-up pointer-events-none"></i>
+                        </button>
                     </div>
                     <div class="bg-red-50 p-3 rounded-xl border border-red-100 relative min-h-[48px] flex items-center">
-                        <div class="flex-1 pr-8"><span class="font-medium text-red-600">🇨🇳 </span><span id="autoZhResult">-</span></div>
-                        <button class="absolute right-3 text-red-400 hover:text-red-600 w-8 h-8 rounded-full" onclick="speakTextFromElement('autoZhResult', 'zh-CN')"><i class="fas fa-volume-up"></i></button>
+                        <div class="flex-1 pr-12"><span class="font-medium text-red-600">🇨🇳 </span><span id="autoZhResult">-</span></div>
+                        <button type="button" class="speaker-btn absolute right-3 text-red-400 hover:text-red-600 w-8 h-8 rounded-full" data-target="autoZhResult" data-lang="zh-CN" title="อ่านคำแปลภาษาจีน">
+                            <i class="fas fa-volume-up pointer-events-none"></i>
+                        </button>
                     </div>
                     <div class="bg-green-50 p-3 rounded-xl border border-green-100 relative min-h-[48px] flex items-center">
-                        <div class="flex-1 pr-8"><span class="font-medium text-green-600">🇹🇭 </span><span id="autoThResult">-</span></div>
-                        <button class="absolute right-3 text-green-400 hover:text-green-600 w-8 h-8 rounded-full" onclick="speakTextFromElement('autoThResult', 'th-TH')"><i class="fas fa-volume-up"></i></button>
+                        <div class="flex-1 pr-12"><span class="font-medium text-green-600">🇹🇭 </span><span id="autoThResult">-</span></div>
+                        <button type="button" class="speaker-btn absolute right-3 text-green-400 hover:text-green-600 w-8 h-8 rounded-full" data-target="autoThResult" data-lang="th-TH" title="อ่านคำแปลภาษาไทย">
+                            <i class="fas fa-volume-up pointer-events-none"></i>
+                        </button>
                     </div>
                 </div>
             </div>
@@ -323,13 +339,13 @@
                         
                         <div class="relative flex-1 sm:flex-none flex items-center">
                             <i class="fas fa-search absolute left-3 text-pink-300 text-sm"></i>
-                            <input type="text" id="searchNote" placeholder="ค้นหา..." class="w-full sm:w-48 pl-9 pr-14 py-2 border border-pink-200 rounded-xl text-sm bg-white focus:outline-none focus:border-pink-400 transition-colors shadow-sm">
-                            <div class="absolute right-2 flex gap-1">
-                                <button type="button" class="speaker-btn text-gray-400 hover:text-blue-500" data-target="searchNote">
-                                    <i class="fas fa-volume-up text-sm"></i>
+                            <input type="text" id="searchNote" placeholder="ค้นหา..." class="w-full sm:w-48 pl-9 pr-24 py-2 border border-pink-200 rounded-xl text-sm bg-white focus:outline-none focus:border-pink-400 transition-colors shadow-sm">
+                            <div class="absolute right-3 flex gap-4">
+                                <button type="button" class="speaker-btn text-gray-400 hover:text-blue-500" data-target="searchNote" title="อ่านออกเสียง / หยุด">
+                                    <i class="fas fa-volume-up text-sm pointer-events-none"></i>
                                 </button>
-                                <button type="button" class="mic-btn text-gray-400 hover:text-pink-500" data-target="searchNote">
-                                    <i class="fas fa-microphone text-sm"></i>
+                                <button type="button" class="mic-btn text-gray-400 hover:text-pink-500" data-target="searchNote" title="พิมพ์ด้วยเสียง">
+                                    <i class="fas fa-microphone text-sm pointer-events-none"></i>
                                 </button>
                             </div>
                         </div>
@@ -339,7 +355,7 @@
                 <div id="subCategoryTabsContainer" class="flex gap-2 overflow-x-auto custom-scrollbar pb-2 mb-4 hidden">
                     </div>
                 
-                <div id="notesListContainer" class="max-h-[800px] overflow-y-auto pr-2 custom-scrollbar pb-6">
+                <div id="notesListContainer" class="notes-container pb-6">
                     <div class="text-center text-pink-300 py-20 flex flex-col items-center">
                         <i class="fas fa-book-heart text-6xl mb-4"></i>
                         <p class="text-lg">เลือกสมุดเพื่อดูบันทึกของคุณ 📝</p>
@@ -351,38 +367,38 @@
     
     <div class="mt-8 text-center pb-8">
         <button id="clearCacheBtn" class="text-gray-400 hover:text-pink-500 text-sm transition-colors flex items-center justify-center gap-2 mx-auto bg-white/50 hover:bg-white px-5 py-2.5 rounded-full border border-pink-100 shadow-sm font-medium">
-            <i class="fas fa-sync-alt"></i> ล้างแคชและอัปเดตเวอร์ชัน
+            <i class="fas fa-sync-alt pointer-events-none"></i> ล้างแคชและอัปเดตเวอร์ชัน
         </button>
     </div>
 </div>
 
-<div id="previewModal" class="modal-backdrop hidden fixed inset-0 bg-pink-900/60 backdrop-blur-md flex items-center justify-center z-[70] p-4" onclick="closePreviewModal()">
-    <div class="bg-white rounded-[2rem] w-full max-w-2xl shadow-2xl transform transition-all border-4 border-pink-50 max-h-[90vh] flex flex-col fade-in-up" onclick="event.stopPropagation()">
+<div id="previewModal" class="modal-backdrop hidden fixed inset-0 bg-pink-900/60 backdrop-blur-md flex items-center justify-center z-[70] p-4">
+    <div class="bg-white rounded-[2rem] w-full max-w-2xl shadow-2xl transform transition-all border-4 border-pink-50 max-h-[90vh] flex flex-col fade-in-up">
         <div class="p-6 border-b border-pink-50 flex justify-between items-start bg-pink-50/30 rounded-t-[1.8rem]">
             <div class="flex-1 pr-4">
-                <div class="flex items-center gap-2 mb-2">
+                <div class="flex items-center gap-4 mb-2">
                     <h2 id="previewModalTitle" class="text-3xl font-bold text-gray-800 leading-tight">หัวข้อ...</h2>
-                    <button id="previewTitleSpeaker" type="button" class="text-blue-400 hover:text-blue-600 transition-colors w-8 h-8 rounded-full bg-white shadow-sm flex items-center justify-center">
-                        <i class="fas fa-volume-up"></i>
+                    <button type="button" class="speaker-btn text-blue-400 hover:text-blue-600 transition-colors w-8 h-8 rounded-full bg-white shadow-sm flex items-center justify-center flex-shrink-0" id="previewTitleSpeaker" title="อ่านชื่อหัวข้อ">
+                        <i class="fas fa-volume-up pointer-events-none"></i>
                     </button>
                 </div>
-                <div id="previewModalSubCat" class="hidden flex items-center gap-2">
+                <div id="previewModalSubCat" class="hidden flex items-center gap-3 mt-2">
                     <span id="previewModalSubCatText" class="bg-indigo-50 text-indigo-500 text-xs px-2.5 py-1 rounded-lg border border-indigo-100 inline-flex items-center font-medium">
                         <i class="fas fa-tag mr-1.5"></i><span></span>
                     </span>
-                    <button id="previewSubCatSpeaker" type="button" class="text-blue-400 hover:text-blue-600 transition-colors w-6 h-6 rounded-full bg-white shadow-sm flex items-center justify-center text-xs">
-                        <i class="fas fa-volume-up"></i>
+                    <button type="button" class="speaker-btn text-blue-400 hover:text-blue-600 transition-colors w-6 h-6 rounded-full bg-white shadow-sm flex items-center justify-center text-xs" id="previewSubCatSpeaker" title="อ่านหมวดหมู่">
+                        <i class="fas fa-volume-up pointer-events-none"></i>
                     </button>
                 </div>
             </div>
-            <button onclick="closePreviewModal()" class="text-gray-400 hover:text-pink-500 text-2xl transition bg-white w-10 h-10 rounded-full shadow-sm flex items-center justify-center flex-shrink-0">
-                <i class="fas fa-times"></i>
+            <button id="closePreviewBtn" class="text-gray-400 hover:text-pink-500 text-2xl transition bg-white w-10 h-10 rounded-full shadow-sm flex items-center justify-center flex-shrink-0">
+                <i class="fas fa-times pointer-events-none"></i>
             </button>
         </div>
         
         <div class="p-6 overflow-y-auto custom-scrollbar flex-1">
             <div id="previewModalImageContainer" class="mb-6 hidden text-center">
-                <img id="previewModalImage" src="" class="max-w-full max-h-80 object-contain rounded-2xl mx-auto shadow-md border-2 border-pink-50 cursor-pointer" onclick="openImageViewer(this.src)" title="ดูรูปเต็ม">
+                <img id="previewModalImage" src="" class="max-w-full max-h-80 object-contain rounded-2xl mx-auto shadow-md border-2 border-pink-50 cursor-pointer" title="ดูรูปเต็ม">
             </div>
             <div id="previewModalFields" class="space-y-4">
                 </div>
@@ -390,7 +406,7 @@
         
         <div class="p-4 border-t border-pink-50 bg-gray-50 rounded-b-[1.8rem] flex justify-end">
             <button id="previewEditBtn" class="bg-blue-50 hover:bg-blue-100 text-blue-600 px-6 py-2 rounded-xl font-medium transition shadow-sm flex items-center gap-2">
-                <i class="fas fa-pen"></i> แก้ไขหน้านี้
+                <i class="fas fa-pen pointer-events-none"></i> แก้ไขหน้านี้
             </button>
         </div>
     </div>
@@ -398,7 +414,7 @@
 
 <div id="categoryModal" class="modal-backdrop hidden fixed inset-0 bg-pink-900/40 backdrop-blur-sm flex items-center justify-center z-50 p-4">
     <div class="bg-white rounded-[2rem] w-full max-w-sm p-8 shadow-2xl transform transition-all border-4 border-pink-50 flex flex-col items-center relative fade-in-up">
-        <button id="closeCategoryX" class="absolute top-6 right-6 text-gray-400 hover:text-pink-500 text-xl"><i class="fas fa-times"></i></button>
+        <button id="closeCategoryX" class="absolute top-6 right-6 text-gray-400 hover:text-pink-500 text-xl"><i class="fas fa-times pointer-events-none"></i></button>
         <h3 id="categoryModalTitle" class="text-2xl font-bold text-rose-500 mb-6">เพิ่มสมุดเล่มใหม่ 📚</h3>
         
         <div class="mb-6 flex flex-col items-center group relative">
@@ -409,10 +425,10 @@
         </div>
 
         <div class="w-full mb-6 relative flex items-center">
-            <input type="text" id="newCategoryName" class="w-full border-2 border-pink-100 rounded-2xl p-3 pr-16 text-center text-lg font-medium text-pink-600 focus:outline-none focus:border-pink-400" placeholder="พิมพ์ชื่อสมุด...">
-            <div class="absolute right-3 flex gap-1">
-                <button type="button" class="speaker-btn text-gray-400 hover:text-blue-500" data-target="newCategoryName"><i class="fas fa-volume-up"></i></button>
-                <button type="button" class="mic-btn text-gray-400 hover:text-pink-500" data-target="newCategoryName"><i class="fas fa-microphone"></i></button>
+            <input type="text" id="newCategoryName" class="w-full border-2 border-pink-100 rounded-2xl p-3 pr-24 text-center text-lg font-medium text-pink-600 focus:outline-none focus:border-pink-400" placeholder="พิมพ์ชื่อสมุด...">
+            <div class="absolute right-3 flex gap-4">
+                <button type="button" class="speaker-btn text-gray-400 hover:text-blue-500" data-target="newCategoryName"><i class="fas fa-volume-up pointer-events-none"></i></button>
+                <button type="button" class="mic-btn text-gray-400 hover:text-pink-500" data-target="newCategoryName"><i class="fas fa-microphone pointer-events-none"></i></button>
             </div>
         </div>
 
@@ -424,7 +440,7 @@
     <div class="bg-white rounded-[2rem] w-full max-w-2xl p-6 shadow-2xl transform transition-all border-4 border-pink-50 max-h-[90vh] flex flex-col fade-in-up">
         <div class="flex justify-between items-center mb-4">
             <h3 class="text-xl font-bold text-rose-500"><i class="fas fa-icons mr-2"></i>เลือกไอคอนน่ารักๆ ✨</h3>
-            <button id="closeIconPickerX" class="text-gray-400 text-2xl hover:text-pink-500 transition"><i class="fas fa-times"></i></button>
+            <button id="closeIconPickerX" class="text-gray-400 text-2xl hover:text-pink-500 transition"><i class="fas fa-times pointer-events-none"></i></button>
         </div>
         <div class="flex gap-2 overflow-x-auto custom-scrollbar pb-3 mb-2 text-sm" id="iconFilterContainer">
             </div>
@@ -434,10 +450,10 @@
     </div>
 </div>
 
-<div id="imageViewerModal" class="modal-backdrop hidden fixed inset-0 bg-black/90 backdrop-blur-md flex items-center justify-center z-[80] p-4" onclick="closeImageViewer()">
+<div id="imageViewerModal" class="modal-backdrop hidden fixed inset-0 bg-black/90 backdrop-blur-md flex items-center justify-center z-[80] p-4">
     <div class="relative w-full h-full flex justify-center items-center">
-        <button class="absolute top-4 right-4 md:top-8 md:right-8 text-white/70 hover:text-white text-5xl z-50 transition transform hover:rotate-90"><i class="fas fa-times"></i></button>
-        <img id="fullSizeImage" src="" class="max-w-full max-h-full object-contain rounded-xl shadow-2xl fade-in-up" onclick="event.stopPropagation()">
+        <button id="closeImageViewerBtn" class="absolute top-4 right-4 md:top-8 md:right-8 text-white/70 hover:text-white text-5xl z-50 transition transform hover:rotate-90"><i class="fas fa-times pointer-events-none"></i></button>
+        <img id="fullSizeImage" src="" class="max-w-full max-h-full object-contain rounded-xl shadow-2xl fade-in-up">
     </div>
 </div>
 
@@ -596,8 +612,8 @@
     // ----------------------------------------------------
     function escapeHtml(s) { 
         if (!s) return ''; 
-        return s.replace(/[&<>]/g, function(m) {
-            return {'&':'&amp;','<':'&lt;','>':'&gt;'}[m];
+        return s.replace(/[&<>"']/g, function(m) {
+            return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m];
         }); 
     }
 
@@ -786,115 +802,157 @@
 
 
     // ----------------------------------------------------
-    // ส่วนที่ 8: ไมโครโฟนพิมพ์ด้วยเสียง และ ลำโพงอ่านข้อความ
+    // ส่วนที่ 8: Global Event Delegation (ไมโครโฟน, ลำโพง, และหน้าต่าง Modal)
     // ----------------------------------------------------
-    const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+    document.addEventListener('click', function(e) {
+        
+        // --- ส่วนของปุ่มลำโพง ---
+        const speakerBtn = e.target.closest('.speaker-btn');
+        if (speakerBtn) {
+            e.preventDefault();
+            e.stopPropagation();
+            handleSpeakerClick(speakerBtn);
+            return;
+        }
+
+        // --- ส่วนของปุ่มไมโครโฟน ---
+        const micBtn = e.target.closest('.mic-btn');
+        if (micBtn) {
+            e.preventDefault();
+            e.stopPropagation();
+            handleMicClick(micBtn);
+            return;
+        }
+        
+        // --- ส่วนของการปิด Modal หากคลิกที่พื้นหลัง ---
+        if (e.target.id === 'previewModal') {
+            closePreviewModal();
+        }
+        if (e.target.id === 'categoryModal') {
+            closeCategoryModal();
+        }
+        if (e.target.id === 'imageViewerModal') {
+            closeImageViewer();
+        }
+        if (e.target.id === 'globalIconPickerModal') {
+            document.getElementById('globalIconPickerModal').classList.add('hidden');
+        }
+    });
     
-    function attachMicEvents() {
-        const micBtns = document.querySelectorAll('.mic-btn');
-        micBtns.forEach(function(btn) { 
-            const newBtn = btn.cloneNode(true);
-            btn.parentNode.replaceChild(newBtn, btn); 
-            
-            newBtn.addEventListener('click', function(e) {
-                e.preventDefault();
-                if (!SpeechRecognition) { 
-                    alert("เบราว์เซอร์นี้ไม่รองรับการพิมพ์ด้วยเสียงค่ะ 🥺"); 
-                    return; 
-                }
-                const targetId = newBtn.getAttribute('data-target');
-                const targetInput = document.getElementById(targetId) || newBtn.previousElementSibling;
-                
-                if (newBtn.classList.contains('recording')) return;
-                
-                const recognition = new SpeechRecognition();
-                recognition.lang = 'th-TH'; 
-                recognition.interimResults = false;
-                recognition.start(); 
-                newBtn.classList.add('recording');
-                
-                recognition.onresult = function(event) {
-                    const transcript = event.results[0][0].transcript;
-                    const currentValue = targetInput.value;
-                    targetInput.value = currentValue ? currentValue + " " + transcript : transcript;
-                    targetInput.dispatchEvent(new Event('input')); 
-                };
-                
-                recognition.onend = function() {
-                    newBtn.classList.remove('recording');
-                };
-                
-                recognition.onerror = function() {
-                    newBtn.classList.remove('recording');
-                };
-            });
-        });
+    // ตั้งค่าปุ่มกากบาทปิดในหน้าต่างต่างๆ
+    document.getElementById('closePreviewBtn').addEventListener('click', closePreviewModal);
+    document.getElementById('closeImageViewerBtn').addEventListener('click', closeImageViewer);
+
+    function handleMicClick(btn) {
+        if (!SpeechRecognition) { 
+            alert("เบราว์เซอร์นี้ไม่รองรับการพิมพ์ด้วยเสียงค่ะ 🥺"); 
+            return; 
+        }
+
+        if (btn.classList.contains('recording')) {
+            return; 
+        }
+
+        const targetId = btn.getAttribute('data-target');
+        let targetInput = null;
+        
+        if (targetId) {
+            targetInput = document.getElementById(targetId);
+        } else {
+            const parent = btn.parentElement;
+            if (parent) {
+                targetInput = parent.querySelector('input') || parent.querySelector('textarea');
+            }
+        }
+
+        if (!targetInput) return;
+
+        const recognition = new SpeechRecognition();
+        recognition.lang = 'th-TH'; 
+        recognition.interimResults = false;
+        
+        recognition.onstart = function() {
+            btn.classList.add('recording');
+        };
+
+        recognition.onresult = function(event) {
+            const transcript = event.results[0][0].transcript;
+            const currentValue = targetInput.value;
+            targetInput.value = currentValue ? currentValue + " " + transcript : transcript;
+            targetInput.dispatchEvent(new Event('input')); 
+        };
+        
+        recognition.onend = function() {
+            btn.classList.remove('recording');
+        };
+        
+        recognition.onerror = function() {
+            btn.classList.remove('recording');
+        };
+
+        recognition.start();
     }
 
-    // ฟังก์ชันอ่านข้อความจาก Text โดยตรง
-    function speakRawText(text) {
+    function handleSpeakerClick(btn) {
         if (!window.speechSynthesis) {
             alert("เบราว์เซอร์นี้ไม่รองรับการอ่านออกเสียงค่ะ 🥺");
             return;
         }
-        if (!text || text.trim() === "") return;
+
+        if (btn.classList.contains('speaking')) {
+            window.speechSynthesis.cancel();
+            btn.classList.remove('speaking');
+            return;
+        }
+
+        let textToSpeak = "";
+        
+        // อ่านจาก data-text ก่อน ถ้ามี
+        const textAttr = btn.getAttribute('data-text');
+        const targetId = btn.getAttribute('data-target');
+
+        if (textAttr) {
+            textToSpeak = decodeURIComponent(textAttr);
+        } else if (targetId) {
+            const targetEl = document.getElementById(targetId);
+            if (targetEl) {
+                textToSpeak = targetEl.tagName === 'INPUT' || targetEl.tagName === 'TEXTAREA' ? targetEl.value : targetEl.innerText;
+            }
+        }
+
+        if (!textToSpeak || textToSpeak.trim() === "" || textToSpeak === "-") return;
         
         window.speechSynthesis.cancel();
-        const utterance = new SpeechSynthesisUtterance(text);
-        utterance.lang = detectLanguageBasic(text) === 'th' ? 'th-TH' : 'en-US';
-        utterance.rate = 0.9;
-        window.speechSynthesis.speak(utterance);
-    }
-
-    function attachSpeakerEvents() {
-        const speakerBtns = document.querySelectorAll('.speaker-btn');
-        speakerBtns.forEach(function(btn) {
-            const newBtn = btn.cloneNode(true);
-            btn.parentNode.replaceChild(newBtn, btn);
-            
-            newBtn.addEventListener('click', function(e) {
-                e.preventDefault();
-                if (!window.speechSynthesis) {
-                    alert("เบราว์เซอร์นี้ไม่รองรับการอ่านออกเสียงค่ะ 🥺");
-                    return;
-                }
-                
-                const targetId = newBtn.getAttribute('data-target');
-                let textToSpeak = "";
-                
-                if (targetId) {
-                    const targetEl = document.getElementById(targetId);
-                    if(targetEl) textToSpeak = targetEl.value || targetEl.innerText;
-                }
-
-                if (!textToSpeak || textToSpeak.trim() === "") return;
-                
-                window.speechSynthesis.cancel();
-                const utterance = new SpeechSynthesisUtterance(textToSpeak);
-                utterance.lang = detectLanguageBasic(textToSpeak) === 'th' ? 'th-TH' : 'en-US';
-                utterance.rate = 0.9;
-                
-                newBtn.classList.add('speaking');
-                
-                utterance.onend = function() { newBtn.classList.remove('speaking'); };
-                utterance.onerror = function() { newBtn.classList.remove('speaking'); };
-                
-                window.speechSynthesis.speak(utterance);
-            });
+        
+        document.querySelectorAll('.speaker-btn').forEach(function(b) {
+            b.classList.remove('speaking');
         });
+
+        const utterance = new SpeechSynthesisUtterance(textToSpeak);
+        
+        let lang = detectLanguageBasic(textToSpeak) === 'th' ? 'th-TH' : 'en-US';
+        if (btn.hasAttribute('data-lang')) {
+            lang = btn.getAttribute('data-lang');
+        }
+        utterance.lang = lang;
+        utterance.rate = 0.9;
+        
+        btn.classList.add('speaking');
+        
+        utterance.onend = function() { 
+            btn.classList.remove('speaking'); 
+        };
+        utterance.onerror = function() { 
+            btn.classList.remove('speaking'); 
+        };
+        
+        window.speechSynthesis.speak(utterance);
     }
 
-    function speakTextFromElement(elementId, lang) {
-        if (!window.speechSynthesis) return;
-        window.speechSynthesis.cancel();
-        
-        const text = document.getElementById(elementId).innerText;
-        if (!text || text === '-' || text.includes('loading-spinner')) return;
-        
-        const utterance = new SpeechSynthesisUtterance(text);
-        utterance.lang = lang; 
-        utterance.rate = 0.9; 
-        window.speechSynthesis.speak(utterance);
+    // ฟังก์ชัน auto-resize สำหรับ textarea
+    function autoResizeTextarea(textarea) {
+        textarea.style.height = 'auto';
+        textarea.style.height = textarea.scrollHeight + 'px';
     }
 
 
@@ -995,10 +1053,10 @@
                     ${escapeHtml(icon)}
                 </button>
                 <div class="relative flex-1 flex items-center">
-                    <input type="text" id="${labelId}" placeholder="ชื่อหัวข้อย่อย" value="${escapeHtml(label)}" class="field-label w-full border border-pink-100 rounded-xl p-2 pr-16 text-sm focus:border-pink-400 focus:outline-none placeholder-gray-400 font-medium text-pink-700 bg-gray-50/50 shadow-sm">
-                    <div class="absolute right-2 flex gap-1">
-                        <button type="button" class="speaker-btn text-gray-400 hover:text-blue-500" data-target="${labelId}"><i class="fas fa-volume-up text-xs"></i></button>
-                        <button type="button" class="mic-btn text-gray-400 hover:text-pink-500" data-target="${labelId}"><i class="fas fa-microphone text-xs"></i></button>
+                    <input type="text" id="${labelId}" placeholder="ชื่อหัวข้อย่อย" value="${escapeHtml(label)}" class="field-label w-full border border-pink-100 rounded-xl p-2 pr-24 text-sm focus:border-pink-400 focus:outline-none placeholder-gray-400 font-medium text-pink-700 bg-gray-50/50 shadow-sm">
+                    <div class="absolute right-3 flex gap-4">
+                        <button type="button" class="speaker-btn text-gray-400 hover:text-blue-500" data-target="${labelId}"><i class="fas fa-volume-up text-xs pointer-events-none"></i></button>
+                        <button type="button" class="mic-btn text-gray-400 hover:text-pink-500" data-target="${labelId}"><i class="fas fa-microphone text-xs pointer-events-none"></i></button>
                     </div>
                 </div>
                 <div class="flex gap-1.5 bg-gray-50/80 p-1.5 rounded-full border border-pink-100 shadow-sm">
@@ -1006,14 +1064,14 @@
                 </div>
             </div>
             <div class="relative w-full flex items-center">
-                <textarea id="${rowId}" rows="2" placeholder="รายละเอียด..." class="field-value w-full border border-pink-100 rounded-xl p-2 pr-16 text-sm bg-gray-50/50 resize-none focus:border-pink-400 focus:outline-none placeholder-gray-400 shadow-inner">${escapeHtml(value)}</textarea>
-                <div class="absolute right-2 top-2 flex gap-1">
-                    <button type="button" class="speaker-btn text-gray-400 hover:text-blue-500" data-target="${rowId}"><i class="fas fa-volume-up text-sm"></i></button>
-                    <button type="button" class="mic-btn text-gray-400 hover:text-pink-500" data-target="${rowId}"><i class="fas fa-microphone text-sm"></i></button>
+                <textarea id="${rowId}" rows="2" placeholder="รายละเอียด..." class="field-value w-full border border-pink-100 rounded-xl p-2 pr-24 text-sm bg-gray-50/50 resize-none focus:border-pink-400 focus:outline-none placeholder-gray-400 shadow-inner">${escapeHtml(value)}</textarea>
+                <div class="absolute right-3 top-3 flex gap-4">
+                    <button type="button" class="speaker-btn text-gray-400 hover:text-blue-500" data-target="${rowId}"><i class="fas fa-volume-up text-sm pointer-events-none"></i></button>
+                    <button type="button" class="mic-btn text-gray-400 hover:text-pink-500" data-target="${rowId}"><i class="fas fa-microphone text-sm pointer-events-none"></i></button>
                 </div>
             </div>
             <button type="button" class="remove-field-btn absolute top-2 right-2 text-gray-300 hover:text-red-500 bg-white hover:bg-red-50 w-7 h-7 rounded-full flex items-center justify-center transition-all shadow-sm border border-transparent hover:border-red-100">
-                <i class="fas fa-trash text-xs"></i>
+                <i class="fas fa-trash text-xs pointer-events-none"></i>
             </button>
         `;
 
@@ -1041,14 +1099,19 @@
             row.remove();
         });
         
+        const textarea = row.querySelector('textarea');
+        if (textarea) {
+            textarea.style.overflowY = 'hidden';
+            autoResizeTextarea(textarea);
+            textarea.addEventListener('input', function() { autoResizeTextarea(this); });
+        }
+        
         return row;
     }
 
     addDynamicFieldBtn.addEventListener('click', function() {
         const newRow = createFieldRow();
         dynamicFieldsContainer.appendChild(newRow);
-        attachMicEvents();
-        attachSpeakerEvents();
     });
 
     function resetDynamicFields() {
@@ -1066,8 +1129,6 @@
         } else {
             dynamicFieldsContainer.appendChild(createFieldRow("รายละเอียด", "", "✨", "pink"));
         }
-        attachMicEvents();
-        attachSpeakerEvents();
     }
 
 
@@ -1095,7 +1156,7 @@
         });
 
         if (filtered.length === 0) {
-            notesListContainer.className = 'max-h-[800px] overflow-y-auto pr-2 custom-scrollbar pb-6';
+            notesListContainer.className = 'notes-container pb-6';
             notesListContainer.innerHTML = `
                 <div class="text-center text-pink-300 py-20 flex flex-col items-center">
                     <i class="fas fa-search-minus text-6xl mb-4"></i>
@@ -1116,7 +1177,7 @@
         else if (currentViewMode === 'medium') gridClass = 'grid grid-cols-3 sm:grid-cols-4 lg:grid-cols-5 gap-4';
         else if (currentViewMode === 'small') gridClass = 'grid grid-cols-4 sm:grid-cols-5 lg:grid-cols-6 gap-3';
         
-        notesListContainer.className = `${gridClass} max-h-[800px] overflow-y-auto pr-2 custom-scrollbar pb-6`;
+        notesListContainer.className = `notes-container ${gridClass} pb-6`;
 
         filtered.forEach(function(entry) {
             const card = document.createElement('div');
@@ -1136,7 +1197,6 @@
         return base + "p-3 sm:p-4 rounded-xl border border-pink-100 shadow-sm flex flex-col items-center text-center note-card-item h-full";
     }
 
-    // รวบรวมข้อความทั้งหมดในการ์ดสำหรับปุ่มอ่านออกเสียงบนการ์ด
     function compileFullTextForSpeaker(entry) {
         let text = entry.title + ". ";
         if (entry.subCategory) text += "หมวดหมู่: " + entry.subCategory + ". ";
@@ -1156,10 +1216,8 @@
             ? `<img src="${entry.image}" class="w-full h-full object-cover">`
             : `<div class="w-full h-full bg-pink-50 flex items-center justify-center text-opacity-50"><span class="scale-150">${icon}</span></div>`;
         
-        // ป้ายหมวดหมู่ย่อย
         const subCatBadge = entry.subCategory ? `<span class="bg-indigo-50 text-indigo-500 text-[11px] px-2 py-0.5 rounded-lg border border-indigo-100 ml-2 align-middle font-medium whitespace-nowrap"><i class="fas fa-tag mr-1 text-[10px]"></i>${escapeHtml(entry.subCategory)}</span>` : '';
 
-        // ข้อมูลรายละเอียดแบบย่อ สำหรับมุมมองต่างๆ
         let firstFieldValue = "";
         let detailsSnippet = "";
         if (entry.fields && entry.fields.length > 0) {
@@ -1168,11 +1226,11 @@
             detailsSnippet = escapeHtml(allText);
         }
 
-        // ปุ่มเครื่องมือบนการ์ด (แก้ไข, ลบ, ลำโพง)
         const fullTextSafe = compileFullTextForSpeaker(entry);
+        
         const btnHTML = `
             <div class="flex gap-1 opacity-100 sm:opacity-0 group-hover:opacity-100 transition-opacity ${mode === 'details' || mode === 'list' ? '' : 'absolute right-2 top-2 bg-white/90 p-1 rounded-lg backdrop-blur-sm shadow-sm border border-pink-50 z-10'}">
-                <button type="button" onclick="speakRawText(decodeURIComponent('${fullTextSafe}')); event.stopPropagation();" class="w-8 h-8 rounded-md text-blue-400 hover:bg-blue-50 hover:text-blue-600 flex items-center justify-center transition" title="อ่านเนื้อหาการ์ดนี้">
+                <button type="button" class="speaker-btn w-8 h-8 rounded-md text-blue-400 hover:bg-blue-50 hover:text-blue-600 flex items-center justify-center transition" data-text="${fullTextSafe}" title="อ่านเนื้อหาการ์ดนี้ / หยุด">
                     <i class="fas fa-volume-up text-sm pointer-events-none"></i>
                 </button>
                 <button type="button" class="edit-note w-8 h-8 rounded-md text-blue-400 hover:bg-blue-50 hover:text-blue-600 flex items-center justify-center transition" data-id="${entry.id}">
@@ -1197,7 +1255,7 @@
                         fieldsHtml += `
                             <div class="text-sm">
                                 ${f.label ? `<span class="font-medium ${colorStyle.badgeBg} ${colorStyle.badgeText} px-2.5 py-1 rounded-lg inline-flex items-center mb-1.5 shadow-sm">${iconHtml}${escapeHtml(f.label)}</span>` : ''}
-                                <div class="text-gray-700 pl-1 whitespace-pre-wrap leading-relaxed">${escapeHtml(f.value)}</div>
+                                <div class="text-gray-700 whitespace-pre-wrap leading-relaxed">${escapeHtml(f.value)}</div>
                             </div>`;
                     }
                 });
@@ -1221,9 +1279,9 @@
         if (mode === 'list') {
             return `
                 <div class="w-10 h-10 rounded-lg overflow-hidden flex-shrink-0 border border-pink-100">${imgDisplay}</div>
-                <div class="flex-1 min-w-0 flex flex-col justify-center">
+                <div class="flex-1 min-w-0 flex flex-col justify-center pr-2">
                     <div class="font-bold text-gray-800 truncate text-base flex items-center">${title} ${subCatBadge}</div>
-                    <div class="text-xs text-gray-500 truncate w-full pr-4">${detailsSnippet}</div>
+                    <div class="text-xs text-gray-500 truncate w-full">${detailsSnippet}</div>
                 </div>
                 ${btnHTML}
             `;
@@ -1249,14 +1307,14 @@
         if (mode === 'tiles') {
             let tileDetails = "";
             if (entry.fields && entry.fields.length > 0) {
-                const limitedFields = entry.fields.slice(0, 2); // โชว์แค่ 2 บรรทัด
+                const limitedFields = entry.fields.slice(0, 2);
                 tileDetails = limitedFields.map(f => `• ${f.label ? escapeHtml(f.label)+': ' : ''}${escapeHtml(f.value)}`).join('<br>');
             } else {
                 tileDetails = "ไม่มีรายละเอียด";
             }
             return `
                 <div class="w-16 h-16 rounded-xl overflow-hidden flex-shrink-0 border border-pink-100 shadow-inner">${imgDisplay}</div>
-                <div class="flex-1 min-w-0 flex flex-col justify-center">
+                <div class="flex-1 min-w-0 flex flex-col justify-center pr-2">
                     <div class="font-bold text-gray-800 truncate text-base mb-1 flex items-center">${title} ${subCatBadge}</div>
                     <div class="text-xs text-gray-500 line-clamp-2">${tileDetails}</div>
                 </div>
@@ -1264,7 +1322,6 @@
             `;
         }
 
-        // xlarge, large, medium, small (Grid View)
         let sizeClass = "w-12 h-12 text-3xl"; 
         if(mode === 'xlarge') sizeClass = "w-32 h-32 sm:w-48 sm:h-48 text-6xl";
         if(mode === 'large') sizeClass = "w-24 h-24 sm:w-32 sm:h-32 text-5xl";
@@ -1281,8 +1338,11 @@
         `;
     }
 
-    // Event Delegation ควบคุมการคลิกบนรายการบันทึก
     notesListContainer.addEventListener('click', function(e) {
+        if (e.target.closest('.speaker-btn') || e.target.closest('.mic-btn')) {
+            return;
+        }
+
         const editBtn = e.target.closest('.edit-note');
         const delBtn = e.target.closest('.delete-note');
         const card = e.target.closest('.note-card-item');
@@ -1311,10 +1371,8 @@
 
         document.getElementById('previewModalTitle').innerText = entry.title || 'ไม่มีหัวข้อ';
         
-        // ผูกปุ่มอ่านชื่อหัวข้อ
         const titleSpeakerBtn = document.getElementById('previewTitleSpeaker');
-        const safeTitle = encodeURIComponent(entry.title || 'ไม่มีหัวข้อ');
-        titleSpeakerBtn.setAttribute('onclick', `speakRawText(decodeURIComponent('${safeTitle}'))`);
+        titleSpeakerBtn.setAttribute('data-text', encodeURIComponent(entry.title || 'ไม่มีหัวข้อ'));
         
         const subCatDiv = document.getElementById('previewModalSubCat');
         const subCatTextSpan = document.getElementById('previewModalSubCatText');
@@ -1323,8 +1381,7 @@
         if (entry.subCategory) {
             subCatTextSpan.innerHTML = `<i class="fas fa-tag mr-1.5"></i><span>${escapeHtml(entry.subCategory)}</span>`;
             subCatDiv.classList.remove('hidden');
-            const safeSubCat = encodeURIComponent(entry.subCategory);
-            subCatSpeakerBtn.setAttribute('onclick', `speakRawText(decodeURIComponent('${safeSubCat}'))`);
+            subCatSpeakerBtn.setAttribute('data-text', encodeURIComponent(entry.subCategory));
         } else {
             subCatDiv.classList.add('hidden');
         }
@@ -1349,9 +1406,9 @@
                     const c = colorMap[colorCode] || colorMap['pink'];
                     
                     const fieldBox = document.createElement('div');
-                    fieldBox.className = "bg-gray-50/50 p-4 rounded-xl border border-gray-100 relative pr-10";
+                    fieldBox.className = "bg-gray-50/50 p-4 rounded-xl border border-gray-100 relative pr-14";
                     
-                    // ปุ่มอ่านสำหรับรายละเอียด (อ่านเฉพาะ Value)
+                    // อ่านเฉพาะรายละเอียดของช่อง (ข้าม Label)
                     const valueTextForSpeaker = encodeURIComponent(f.value || "");
                     
                     fieldBox.innerHTML = `
@@ -1361,15 +1418,13 @@
                             </div>
                         ` : ''}
                         <div class="text-gray-700 whitespace-pre-wrap leading-relaxed pl-1">${escapeHtml(f.value)}</div>
-                        <button type="button" onclick="speakRawText(decodeURIComponent('${valueTextForSpeaker}'))" class="speaker-btn absolute right-3 top-3 text-blue-400 hover:text-blue-600 w-8 h-8 rounded-full transition-colors flex items-center justify-center bg-white shadow-sm hover:shadow" title="อ่านรายละเอียดนี้">
-                            <i class="fas fa-volume-up"></i>
+                        <button type="button" class="speaker-btn absolute right-4 top-4 text-blue-400 hover:text-blue-600 w-8 h-8 rounded-full transition-colors flex items-center justify-center bg-white shadow-sm hover:shadow" data-text="${valueTextForSpeaker}" title="อ่านเฉพาะข้อมูลนี้ / หยุด">
+                            <i class="fas fa-volume-up pointer-events-none"></i>
                         </button>
                     `;
                     fieldsCont.appendChild(fieldBox);
                 }
             });
-            // ใส่ระบบอ่านออกเสียงใน Modal ด้วย
-            attachSpeakerEvents();
         } else {
             fieldsCont.innerHTML = `<div class="text-gray-400 italic text-center py-4">ไม่มีรายละเอียดเพิ่มเติม</div>`;
         }
@@ -1385,7 +1440,7 @@
 
     function closePreviewModal() {
         previewModal.classList.add('hidden');
-        window.speechSynthesis.cancel(); // หยุดอ่านเมื่อปิดหน้าต่าง
+        window.speechSynthesis.cancel(); 
     }
 
 
@@ -1420,9 +1475,6 @@
         
         cancelEditBtn.classList.remove('hidden');
         submitBtnText.innerText = "อัปเดต";
-        
-        attachMicEvents();
-        attachSpeakerEvents();
     }
 
     function clearForm() {
@@ -1519,8 +1571,6 @@
     // ----------------------------------------------------
     // ส่วนที่ 13: การจัดการสมุดหมวดหมู่และการจำสมุดล่าสุด
     // ----------------------------------------------------
-    
-    // ตั้งค่าตัวแปรจำสมุดสำหรับแต่ละ User
     function getStorageKeyForNotebook() {
         if (!currentUser) return null;
         return 'cute_notebook_last_cat_' + currentUser.uid;
@@ -1571,7 +1621,6 @@
         }
         
         if (isEditingCategory && selectedCategoryId) {
-            // โหมดอัปเดต
             await db.collection('users').doc(currentUser.uid).collection('diaryCategories').doc(selectedCategoryId).update({
                 name: name,
                 icon: selectedIcon
@@ -1581,11 +1630,14 @@
                 categories[catIndex].name = name;
                 categories[catIndex].icon = selectedIcon;
             }
+            
+            const catSpan = document.getElementById('selectedCategoryName');
+            if(catSpan) catSpan.innerHTML = `${selectedIcon} ${name}`;
+            
             renderCategoryTabs();
             loadNotes(); 
             closeCategoryModal();
         } else {
-            // โหมดสร้างใหม่
             let defaultFields = [{label: "รายละเอียด", icon: "✨", color: "pink"}];
             if (name.includes('ภาษา') || name.includes('แปล') || name.includes('ศัพท์')) { 
                 defaultFields = [
@@ -1638,7 +1690,6 @@
             ];
         }
         
-        // ดึงค่าสมุดล่าสุดที่จำไว้ของ User นี้มาใช้งาน
         const storageKey = getStorageKeyForNotebook();
         let savedCategoryId = null;
         if (storageKey) {
@@ -1671,7 +1722,6 @@
             btn.onclick = function() {
                 selectedCategoryId = cat.id;
                 
-                // บันทึกการเลือกหมวดหมู่ลง LocalStorage
                 const storageKey = getStorageKeyForNotebook();
                 if (storageKey) localStorage.setItem(storageKey, cat.id);
                 
@@ -1708,7 +1758,6 @@
         loadCategories();
     }
 
-    // ฟังก์ชันจัดการแท็บหมวดหมู่ย่อย (Sub-Category Tabs)
     function updateSubCategoryTabs() {
         const container = document.getElementById('subCategoryTabsContainer');
         const datalist = document.getElementById('subCategoryList');
@@ -1842,10 +1891,6 @@
     confirmCategoryBtn.addEventListener('click', saveCategory);
     closeCategoryX.addEventListener('click', closeCategoryModal);
     
-    categoryModal.addEventListener('click', function(e) {
-        if (e.target === categoryModal) closeCategoryModal(); 
-    });
-    
     loginBtn.addEventListener('click', googleSignIn);
     logoutBtn.addEventListener('click', function() {
         auth.signOut();
@@ -1853,10 +1898,16 @@
     
     auth.onAuthStateChanged(updateUI);
     
-    // เรียกใช้งาน Mic และ Speaker เมื่อหน้าเว็บโหลดเสร็จ
     window.addEventListener('DOMContentLoaded', () => {
-        attachMicEvents();
-        attachSpeakerEvents();
+        if (autoTranslateInput) {
+            autoTranslateInput.style.overflowY = 'hidden';
+            autoTranslateInput.style.height = 'auto';
+            autoTranslateInput.style.height = autoTranslateInput.scrollHeight + 'px';
+            autoTranslateInput.addEventListener('input', function() { 
+                this.style.height = 'auto';
+                this.style.height = this.scrollHeight + 'px'; 
+            });
+        }
     });
 
 </script>
