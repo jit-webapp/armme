@@ -1,4 +1,4 @@
-const CACHE_NAME = 'cute-notebook-v2';
+const CACHE_NAME = 'cute-notebook-v2.1';
 const urlsToCache = ['./', './index.html', './manifest.json', './icon.svg'];
 
 self.addEventListener('install', event => {
