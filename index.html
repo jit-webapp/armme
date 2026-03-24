@@ -3,284 +3,367 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
-    <title>สมุดคำศัพท์ส่วนตัว | แปลไทย อังกฤษ จีน + ใส่คำอ่านเองได้</title>
+    <title>🌸 สมุดจดบันทึกของฉัน | My Cute Notebook</title>
+    
+    <link rel="manifest" href="manifest.json">
+    <meta name="theme-color" content="#f472b6">
+    <link rel="apple-touch-icon" href="icon.svg">
+
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
-    <link href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,300;14..32,400;14..32,500;14..32,600;14..32,700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Kanit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-auth-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
     <style>
-        body { transition: background-color 0.2s, color 0.2s; }
-        .modal-backdrop {
-            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-            background-color: rgba(0,0,0,0.5); display: flex; align-items: center;
-            justify-content: center; z-index: 50;
+        body { 
+            background-color: #fce7f3; 
+            background-image: radial-gradient(#f9a8d4 1px, transparent 1px);
+            background-size: 20px 20px;
+            font-family: 'Kanit', sans-serif; 
         }
-        .modal-content { max-width: 90%; width: 500px; max-height: 90vh; overflow-y: auto; }
+        
+        .paper-card {
+            background: #fff0f5;
+            border: 2px dashed #fbcfe8;
+            border-radius: 24px;
+            box-shadow: 0 8px 20px rgba(244, 114, 182, 0.2);
+        }
+
+        .entry-card {
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            border-left: 6px solid #f472b6; 
+            border-radius: 16px;
+            background: rgba(255, 255, 255, 0.85);
+        }
+        .entry-card:hover { 
+            transform: translateY(-3px) scale(1.01); 
+            box-shadow: 0 10px 15px -3px rgba(244, 114, 182, 0.2);
+            background: rgba(255, 255, 255, 1);
+        }
+
         .btn-primary {
-            @apply bg-primary-600 hover:bg-primary-700 text-white font-semibold py-2 px-4 rounded-xl shadow-md transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:ring-offset-2 dark:focus:ring-offset-gray-800;
+            @apply bg-gradient-to-r from-pink-400 to-rose-400 hover:from-pink-500 hover:to-rose-500 text-white font-medium py-2 px-5 rounded-2xl shadow-lg shadow-pink-200 transition-all duration-200 transform hover:scale-105;
         }
         .btn-outline {
-            @apply border border-gray-300 dark:border-gray-600 bg-white/70 dark:bg-gray-800/70 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-xl px-3 py-2 transition;
+            @apply border-2 border-pink-200 bg-white/70 text-pink-600 hover:bg-pink-50 rounded-2xl px-4 py-2 font-medium transition-all;
         }
-        .voice-btn, .translate-compact-btn {
-            @apply bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600 rounded-full p-2 transition;
-        }
-        .speaker-btn, .arrow-back-btn {
-            @apply text-gray-500 hover:text-primary-600 dark:text-gray-400 dark:hover:text-primary-400 transition p-1.5 rounded-full hover:bg-gray-100 dark:hover:bg-gray-700;
-        }
-        .save-btn-gradient {
-            background: linear-gradient(135deg, #10b981, #059669);
-            @apply text-white font-bold py-3 px-6 rounded-xl shadow-lg transition-all duration-200 text-base flex items-center gap-2 hover:shadow-xl hover:scale-105;
-        }
-        .reset-btn {
-            @apply bg-gray-200 dark:bg-gray-700 hover:bg-gray-300 dark:hover:bg-gray-600 text-gray-700 dark:text-gray-200 rounded-xl px-3 py-2 transition-all duration-200;
-        }
-        .google-btn {
-            @apply w-full flex items-center justify-center gap-2 bg-white text-gray-700 border border-gray-300 rounded-xl py-2 px-4 hover:bg-gray-50 transition dark:bg-gray-800 dark:text-gray-200 dark:border-gray-600 dark:hover:bg-gray-700;
-        }
-        /* Responsive arrow icons */
-        @media (max-width: 768px) {
-            .arrow-back-btn .arrow-left-icon { display: none; }
-            .arrow-back-btn .arrow-up-icon { display: inline-block; }
-        }
-        @media (min-width: 769px) {
-            .arrow-back-btn .arrow-left-icon { display: inline-block; }
-            .arrow-back-btn .arrow-up-icon { display: none; }
-        }
-        .arrow-back-btn .arrow-left-icon,
-        .arrow-back-btn .arrow-up-icon { font-size: 1rem; }
-        .compact-card {
-            padding: 1rem !important;
-        }
-        .compact-card .source-select {
-            margin-bottom: 0.75rem;
-        }
-        .compact-card textarea {
-            min-height: 80px;
-        }
-        .compact-card .action-row {
-            display: flex;
-            justify-content: flex-end;
-            gap: 0.5rem;
-            margin-top: 0.5rem;
-        }
-        .saved-card {
-            font-size: 0.95rem;
-        }
-        .saved-card .font-bold {
-            font-size: 1rem;
-        }
-        .saved-card .font-medium {
-            font-size: 0.9rem;
-        }
-        .search-wrapper {
-            position: relative;
-        }
-        .search-wrapper input {
-            padding-right: 2.5rem;
-        }
-        .clear-search {
-            position: absolute;
-            right: 0.75rem;
-            top: 50%;
-            transform: translateY(-50%);
-            cursor: pointer;
-            color: #9ca3af;
-            transition: color 0.2s;
-        }
-        .clear-search:hover {
-            color: #ef4444;
-        }
-    </style>
-    <script>
-        tailwind.config = {
-            darkMode: 'class',
-            theme: {
-                extend: {
-                    colors: {
-                        primary: {
-                            50: '#eef2ff', 100: '#e0e7ff', 200: '#c7d2fe', 300: '#a5b4fc',
-                            400: '#818cf8', 500: '#6366f1', 600: '#4f46e5', 700: '#4338ca',
-                            800: '#3730a3', 900: '#312e81', 950: '#1e1b4b',
-                        }
-                    },
-                    fontFamily: { 'sans': ['Inter', 'system-ui', 'sans-serif'] }
-                }
-            }
-        }
-    </script>
-</head>
-<body class="bg-gray-50 dark:bg-gray-900 text-gray-900 dark:text-gray-100 font-sans antialiased">
 
-<div id="main-content" class="max-w-7xl mx-auto px-4 sm:px-6 py-6 md:py-8">
-    <!-- Header -->
-    <div class="flex flex-wrap justify-between items-center mb-6 gap-3">
-        <div>
-            <h1 class="text-2xl md:text-3xl font-bold bg-gradient-to-r from-primary-600 to-primary-800 bg-clip-text text-transparent">📘 สมุดคำศัพท์ส่วนตัว</h1>
-            <p class="text-sm text-gray-500 dark:text-gray-400 mt-1">แปลไทย ↔ อังกฤษ ↔ จีน • บันทึกคำศัพท์ • ฟังเสียง • คลิกข้อความเพื่อแปลซ้ำ</p>
-        </div>
-        <div class="flex gap-2 items-center">
-            <button id="darkModeToggle" class="btn-outline rounded-full text-lg w-10 h-10 flex items-center justify-center shadow-sm">
-                <i class="fas fa-moon dark:fa-sun"></i>
-            </button>
-            <div id="authButtons" class="flex gap-2">
-                <button id="loginBtn" class="btn-outline px-3 py-2 text-sm">เข้าสู่ระบบ</button>
-                <button id="registerBtn" class="btn-primary px-3 py-2 text-sm">สมัครสมาชิก</button>
+        .category-tabs, .custom-scrollbar {
+            scrollbar-width: thin;
+            scrollbar-color: #fbcfe8 transparent;
+        }
+        .category-tabs::-webkit-scrollbar, .custom-scrollbar::-webkit-scrollbar { height: 6px; width: 6px; }
+        .category-tabs::-webkit-scrollbar-thumb, .custom-scrollbar::-webkit-scrollbar-thumb { background-color: #fbcfe8; border-radius: 10px; }
+        
+        .category-tabs { overflow-x: auto; white-space: nowrap; }
+
+        .icon-option {
+            cursor: pointer;
+            transition: transform 0.2s;
+            display: inline-flex;
+            justify-content: center;
+            align-items: center;
+            width: 46px;
+            height: 46px;
+            border-radius: 12px;
+        }
+        .icon-option:hover { transform: scale(1.2); background: #fce7f3; }
+        .icon-option.selected {
+            background: #fbcfe8;
+            transform: scale(1.2);
+            box-shadow: 0 0 0 2px #f472b6;
+        }
+        
+        .mic-btn.recording {
+            color: #ef4444 !important;
+            animation: pulse 1.5s infinite;
+        }
+
+        .loading-spinner {
+            display: inline-block;
+            width: 1rem; height: 1rem;
+            border: 2px solid #fbcfe8; border-top-color: #f472b6;
+            border-radius: 50%;
+            animation: spin 0.6s linear infinite;
+        }
+        @keyframes spin { to { transform: rotate(360deg); } }
+
+        /* อนิเมชันสำหรับ Modal พรีวิว */
+        .fade-in-up { animation: fadeInUp 0.3s ease-out; }
+        @keyframes fadeInUp { from { opacity: 0; transform: translateY(20px) scale(0.95); } to { opacity: 1; transform: translateY(0) scale(1); } }
+    </style>
+</head>
+<body class="text-gray-700 min-h-screen">
+
+<div class="max-w-6xl mx-auto px-4 py-8">
+    <div class="flex flex-wrap justify-between items-center mb-8 gap-4">
+        <div class="flex items-center gap-4 bg-white/80 p-4 rounded-3xl shadow-sm border border-pink-100 flex-1 min-w-[300px]">
+            <div class="bg-pink-100 p-3 rounded-2xl flex-shrink-0">
+                <i class="fas fa-heart text-3xl text-pink-500"></i>
             </div>
-            <div id="userInfo" class="hidden items-center gap-2">
-                <img id="userAvatar" class="w-8 h-8 rounded-full hidden">
-                <span id="userEmail" class="text-sm truncate max-w-[150px]"></span>
-                <button id="logoutBtn" class="btn-outline text-sm px-2 py-1">ออกจากระบบ</button>
+            <div class="flex-1 w-full">
+                <div class="flex items-center gap-2">
+                    <h1 id="appTitle" class="text-2xl md:text-3xl font-bold text-rose-500 tracking-wide outline-none border-b-2 border-transparent focus:border-rose-300 transition-colors w-full max-w-[300px] truncate" contenteditable="false">My Notebook 🌸</h1>
+                    <button id="editTitleBtn" class="text-pink-300 hover:text-pink-500 bg-white hover:bg-pink-50 rounded-full w-8 h-8 flex items-center justify-center transition shadow-sm border border-pink-100" title="เปลี่ยนชื่อแอป"><i class="fas fa-pen text-xs"></i></button>
+                </div>
+                <p class="text-sm text-pink-400 font-medium mt-1">สมุดจดบันทึกส่วนตัว สไตล์คิวท์ๆ</p>
+            </div>
+        </div>
+        
+        <div class="flex gap-3 items-center">
+            <div id="authButtons" class="flex gap-2">
+                <button id="loginBtn" class="bg-white border-2 border-pink-100 hover:bg-pink-50 hover:border-pink-300 text-gray-700 font-medium py-2 px-5 rounded-2xl shadow-sm transition-all duration-200 flex items-center gap-3">
+                    <img src="https://www.svgrepo.com/show/475656/google-color.svg" class="w-5 h-5" alt="Google"> เข้าสู่ระบบด้วย Google
+                </button>
+            </div>
+            
+            <div id="userInfo" class="hidden items-center gap-3 bg-white/80 px-4 py-2 rounded-full border border-pink-100 shadow-sm">
+                <img id="userAvatar" class="w-8 h-8 rounded-full hidden border border-pink-200">
+                <span id="userEmail" class="text-sm font-medium truncate max-w-[120px]"></span>
+                <button id="logoutBtn" class="text-pink-400 hover:text-pink-600 text-sm font-medium ml-2">ออก</button>
             </div>
         </div>
     </div>
 
-    <div class="flex flex-col lg:grid lg:grid-cols-2 gap-8">
-        <!-- ภาษาต้นทาง (กะทัดรัด) -->
-        <div class="order-1 lg:order-none lg:col-span-1 bg-white dark:bg-gray-800 rounded-2xl shadow-sm border border-gray-100 dark:border-gray-700 p-4 compact-card">
-            <div class="flex items-center gap-2 mb-2">
-                <label class="block text-sm font-medium flex items-center gap-2"><i class="fas fa-language text-primary-500"></i>ภาษาต้นทาง</label>
-                <button id="resetLangBtn" class="reset-btn text-xs py-1 px-2" title="รีเซ็ตภาษาเป็นอัตโนมัติและล้างข้อความ">
-                    <i class="fas fa-undo-alt"></i> รีเซ็ต
-                </button>
+    <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
+        
+        <div class="lg:col-span-5 xl:col-span-4 space-y-6">
+            
+            <div class="paper-card p-5">
+                <div class="flex justify-between items-center mb-4">
+                    <h2 class="font-semibold text-lg flex items-center gap-2 text-rose-500">
+                        <i class="fas fa-folder-open"></i> ชั้นวางสมุด
+                    </h2>
+                    <div class="flex items-center gap-2">
+                        <div id="categoryActions" class="hidden flex gap-1">
+                            <button onclick="editCategoryName()" class="w-8 h-8 rounded-full bg-blue-50 text-blue-400 hover:text-blue-600 hover:bg-blue-100 transition shadow-sm" title="เปลี่ยนชื่อสมุด"><i class="fas fa-edit"></i></button>
+                            <button onclick="deleteCategory()" class="w-8 h-8 rounded-full bg-red-50 text-red-400 hover:text-red-600 hover:bg-red-100 transition shadow-sm" title="ลบสมุดทิ้ง"><i class="fas fa-trash-alt"></i></button>
+                        </div>
+                        <button id="addCategoryBtn" class="text-sm bg-pink-100 hover:bg-pink-200 px-4 py-1.5 rounded-full flex items-center gap-2 text-pink-600 font-medium transition-colors shadow-sm">
+                            <i class="fas fa-plus"></i> เพิ่ม
+                        </button>
+                    </div>
+                </div>
+                <div class="category-tabs flex flex-wrap gap-2 pb-2" id="categoryTabsContainer">
+                    </div>
             </div>
-            <select id="sourceLangSelect" class="w-full border border-gray-300 dark:border-gray-600 rounded-xl px-4 py-2 bg-white dark:bg-gray-700 focus:ring-2 focus:ring-primary-500 source-select">
-                <option value="auto" selected>🤖 อัตโนมัติ (Auto Detect)</option>
-                <option value="th">🇹🇭 ไทย (Thai)</option>
-                <option value="en">🇬🇧 อังกฤษ (English)</option>
-                <option value="zh">🇨🇳 จีน (Chinese)</option>
-            </select>
-            <div class="mt-2 relative">
-                <textarea id="inputText" rows="2" class="w-full border border-gray-300 dark:border-gray-600 rounded-xl p-3 bg-gray-50 dark:bg-gray-700/50 focus:ring-2 focus:ring-primary-400 resize-none" placeholder="พิมพ์หรือพูดข้อความ..."></textarea>
+
+            <div class="paper-card p-6">
+                <h2 class="font-semibold text-xl mb-5 flex items-center gap-2 text-rose-500">
+                    <i class="fas fa-pen-fancy"></i> จดบันทึกใหม่ ✨
+                </h2>
+                
+                <form id="noteForm">
+                    <input type="hidden" id="editId" value="">
+                    
+                    <div class="mb-5">
+                        <label class="block text-sm font-medium mb-2 text-gray-600">หัวข้อหลัก <span class="text-rose-500">*</span></label>
+                        <div class="relative">
+                            <input type="text" id="mainTitleField" required class="w-full border-2 border-pink-100 rounded-2xl p-3 pr-10 bg-white focus:outline-none focus:border-pink-400 font-medium text-lg placeholder-pink-200" placeholder="พิมพ์หรือพูดหัวข้อ...">
+                            <button type="button" class="mic-btn absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-pink-500 text-lg" data-target="mainTitleField"><i class="fas fa-microphone"></i></button>
+                        </div>
+                    </div>
+
+                    <hr class="border-pink-100 mb-4">
+
+                    <div class="mb-5">
+                        <label class="block text-sm font-medium mb-2 text-gray-600">แนบรูปภาพ (ออปชันเสริม)</label>
+                        <input type="file" id="imageInput" accept="image/*" class="hidden">
+                        <button type="button" id="triggerImageBtn" class="w-full border-2 border-dashed border-pink-200 hover:border-pink-400 bg-white/50 hover:bg-pink-50 text-pink-500 rounded-2xl py-3 flex justify-center items-center gap-2 transition-colors">
+                            <i class="fas fa-image"></i> เลือกรูปภาพ
+                        </button>
+                        
+                        <div id="imagePreviewContainer" class="relative hidden mt-3">
+                            <img id="imagePreview" class="w-full h-32 object-cover rounded-2xl border-2 border-pink-100 shadow-sm" src="" alt="Preview">
+                            <button type="button" id="removeImageBtn" class="absolute top-2 right-2 bg-red-500 hover:bg-red-600 text-white rounded-full w-8 h-8 flex items-center justify-center shadow-md transition transform hover:scale-110" title="ลบรูปภาพ">
+                                <i class="fas fa-times"></i>
+                            </button>
+                        </div>
+                    </div>
+
+                    <hr class="border-pink-100 mb-4">
+
+                    <div class="mb-2 flex justify-between items-center">
+                        <label class="block text-sm font-medium text-gray-600">รายละเอียด</label>
+                        <button type="button" id="addDynamicFieldBtn" class="text-xs bg-pink-50 hover:bg-pink-100 text-pink-600 px-3 py-1 rounded-full flex items-center gap-1 transition-colors">
+                            <i class="fas fa-plus-circle"></i> เพิ่มช่อง
+                        </button>
+                    </div>
+                    
+                    <div id="dynamicFieldsContainer" class="space-y-3 mb-6">
+                        </div>
+
+                    <div class="flex justify-between items-center gap-2 sm:gap-4 mt-6">
+                        <button type="button" id="clearFormBtn" class="flex-1 bg-white border-2 border-orange-200 hover:bg-orange-50 text-orange-500 py-3 rounded-2xl flex justify-center items-center gap-1 sm:gap-2 font-medium transition-all shadow-sm text-sm sm:text-base">
+                            <i class="fas fa-eraser text-lg sm:text-xl text-orange-400"></i> <span class="hidden sm:inline">ล้าง</span>
+                        </button>
+                        
+                        <button type="button" id="cancelEditBtn" class="hidden flex-1 bg-white border-2 border-gray-200 hover:bg-gray-50 text-gray-500 py-3 rounded-2xl flex justify-center items-center gap-1 sm:gap-2 font-medium transition-all shadow-sm text-sm sm:text-base">
+                            <i class="fas fa-times text-lg sm:text-xl text-gray-400"></i> ยกเลิก
+                        </button>
+
+                        <button type="submit" class="flex-[1.5] bg-gradient-to-r from-emerald-400 to-teal-400 hover:from-emerald-500 hover:to-teal-500 text-white py-3 rounded-2xl flex justify-center items-center gap-1 sm:gap-2 font-medium transition-all shadow-lg shadow-emerald-200 transform hover:scale-105 text-sm sm:text-lg">
+                            <i class="fas fa-save text-lg sm:text-xl"></i> <span id="submitBtnText">บันทึก</span>
+                        </button>
+                    </div>
+                </form>
             </div>
-            <div class="action-row">
-                <button id="voiceInputBtn" class="voice-btn" title="พูดป้อนข้อความ"><i class="fas fa-microphone text-lg"></i></button>
-                <button id="clearInputBtn" class="voice-btn text-gray-400 hover:text-gray-600" title="ล้างข้อความ"><i class="fas fa-eraser"></i></button>
-                <button id="translateBtn" class="btn-primary text-sm py-1.5 px-3 flex items-center gap-2 rounded-xl shadow-md">
-                    <i class="fas fa-language"></i> แปล
-                </button>
+
+            <div id="translationToolContainer" class="paper-card p-6 hidden">
+                <h3 class="font-semibold text-lg flex items-center gap-2 text-sky-500 mb-3">
+                    <i class="fas fa-language"></i> ตัวช่วยแปล & ออกเสียง
+                </h3>
+                <div class="relative mb-3">
+                    <textarea id="autoTranslateInput" rows="2" class="w-full border-2 border-pink-100 rounded-2xl p-3 pr-10 bg-white focus:outline-none focus:border-pink-400 resize-none text-sm" placeholder="พิมพ์หรือพูดเพื่อแปล..."></textarea>
+                    <button type="button" class="mic-btn absolute right-3 top-3 text-gray-400 hover:text-pink-500" data-target="autoTranslateInput"><i class="fas fa-microphone"></i></button>
+                </div>
+                <div class="space-y-2 mt-3 text-sm">
+                    <div class="bg-blue-50/50 p-3 rounded-xl border border-blue-100 relative min-h-[48px] flex items-center">
+                        <div class="flex-1 pr-8"><span class="font-medium text-blue-600 mr-1">🇬🇧 EN:</span><span id="autoEnResult" class="text-gray-700">-</span></div>
+                        <button class="absolute right-3 top-1/2 -translate-y-1/2 text-blue-400 hover:text-blue-600 w-8 h-8 flex items-center justify-center rounded-full hover:bg-blue-100 transition" onclick="speakResult('autoEnResult', 'en-US')"><i class="fas fa-volume-up"></i></button>
+                    </div>
+                    <div class="bg-red-50/50 p-3 rounded-xl border border-red-100 relative min-h-[48px] flex items-center">
+                        <div class="flex-1 pr-8"><span class="font-medium text-red-600 mr-1">🇨🇳 ZH:</span><span id="autoZhResult" class="text-gray-700">-</span></div>
+                        <button class="absolute right-3 top-1/2 -translate-y-1/2 text-red-400 hover:text-red-600 w-8 h-8 flex items-center justify-center rounded-full hover:bg-red-100 transition" onclick="speakResult('autoZhResult', 'zh-CN')"><i class="fas fa-volume-up"></i></button>
+                    </div>
+                    <div class="bg-green-50/50 p-3 rounded-xl border border-green-100 relative min-h-[48px] flex items-center">
+                        <div class="flex-1 pr-8"><span class="font-medium text-green-600 mr-1">🇹🇭 TH:</span><span id="autoThResult" class="text-gray-700">-</span></div>
+                        <button class="absolute right-3 top-1/2 -translate-y-1/2 text-green-400 hover:text-green-600 w-8 h-8 flex items-center justify-center rounded-full hover:bg-green-100 transition" onclick="speakResult('autoThResult', 'th-TH')"><i class="fas fa-volume-up"></i></button>
+                    </div>
+                </div>
             </div>
-            <div id="detectedLangInfo" class="text-xs text-gray-400 mt-2 hidden"></div>
         </div>
 
-        <!-- ผลลัพธ์การแปล -->
-        <div class="order-2 lg:order-none lg:col-span-1 space-y-5">
-            <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-sm border border-gray-100 dark:border-gray-700 p-5">
-                <h3 class="font-semibold text-lg mb-3 flex items-center gap-2"><i class="fas fa-globe"></i> ผลลัพธ์การแปล</h3>
-                <div class="border border-gray-200 dark:border-gray-700 rounded-xl p-3 bg-gray-50/40 dark:bg-gray-800/50 space-y-3">
-                    <!-- ไทย -->
-                    <div class="flex flex-wrap items-start justify-between gap-2">
-                        <div class="flex items-center gap-2 flex-wrap">
-                            <span class="font-medium text-primary-600 dark:text-primary-400"><i class="fas fa-flag-checkered"></i> ไทย</span>
-                            <button class="arrow-back-btn" data-lang="th" data-text-id="thResult" title="นำข้อความนี้ไปแปลซ้ำ">
-                                <i class="fas fa-arrow-left arrow-left-icon"></i>
-                                <i class="fas fa-arrow-up arrow-up-icon"></i>
-                            </button>
+        <div class="lg:col-span-7 xl:col-span-8 space-y-6">
+            <div class="paper-card p-5 h-full">
+                <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6 gap-4 bg-white/50 p-3 rounded-2xl border border-pink-50 shadow-sm">
+                    <h2 class="font-semibold text-xl flex items-center gap-2 text-rose-500">
+                        <i class="fas fa-book-open text-pink-400"></i> 
+                        <span id="selectedCategoryName" class="text-gray-800">บันทึกทั้งหมด</span>
+                    </h2>
+
+                    <div class="flex items-center gap-2 w-full sm:w-auto">
+                        <div class="relative flex-1 sm:flex-none">
+                            <select id="viewModeSelector" class="w-full appearance-none bg-white border border-pink-200 hover:border-pink-300 rounded-xl px-4 py-2 pr-8 text-sm focus:outline-none text-pink-600 font-medium shadow-sm transition cursor-pointer">
+                                <option value="content">📝 รูปแบบเนื้อหา</option>
+                                <option value="details">📄 รายละเอียด</option>
+                                <option value="tiles">🪟 กระเบื้อง</option>
+                                <option value="list">🔠 รายการย่อ</option>
+                                <option value="xlarge">🖼️ ไอคอนใหญ่พิเศษ</option>
+                                <option value="large">🖼️ ไอคอนใหญ่</option>
+                                <option value="medium">🖼️ ไอคอนกลาง</option>
+                                <option value="small">🖼️ ไอคอนเล็ก</option>
+                            </select>
+                            <i class="fas fa-chevron-down absolute right-3 top-1/2 -translate-y-1/2 text-pink-400 pointer-events-none text-xs"></i>
                         </div>
-                        <div class="flex gap-2">
-                            <button class="speaker-btn" data-lang="th" data-text-id="thResult"><i class="fas fa-volume-up"></i></button>
+
+                        <div class="relative flex-1 sm:flex-none">
+                            <i class="fas fa-search absolute left-3 top-1/2 -translate-y-1/2 text-pink-300 text-sm"></i>
+                            <input type="text" id="searchNote" placeholder="ค้นหาในสมุดนี้..." class="w-full sm:w-48 pl-9 pr-8 py-2 border border-pink-200 rounded-xl text-sm bg-white focus:outline-none focus:border-pink-400 transition-colors shadow-sm">
+                            <button type="button" class="mic-btn absolute right-2 top-1/2 -translate-y-1/2 text-gray-400 hover:text-pink-500" data-target="searchNote" title="ค้นหาด้วยเสียง"><i class="fas fa-microphone text-sm"></i></button>
                         </div>
-                        <p id="thResult" class="w-full text-gray-800 dark:text-gray-200 break-words mt-1">-</p>
-                    </div>
-                    <!-- อังกฤษ -->
-                    <div class="flex flex-wrap items-start justify-between gap-2">
-                        <div class="flex items-center gap-2 flex-wrap">
-                            <span class="font-medium text-primary-600 dark:text-primary-400"><i class="fas fa-language"></i> อังกฤษ</span>
-                            <button class="arrow-back-btn" data-lang="en" data-text-id="enResult" title="นำข้อความนี้ไปแปลซ้ำ">
-                                <i class="fas fa-arrow-left arrow-left-icon"></i>
-                                <i class="fas fa-arrow-up arrow-up-icon"></i>
-                            </button>
-                        </div>
-                        <div class="flex gap-2">
-                            <button class="speaker-btn" data-lang="en" data-text-id="enResult"><i class="fas fa-volume-up"></i></button>
-                        </div>
-                        <p id="enResult" class="w-full text-gray-800 dark:text-gray-200 break-words mt-1">-</p>
-                    </div>
-                    <!-- จีน -->
-                    <div class="flex flex-wrap items-start justify-between gap-2">
-                        <div class="flex items-center gap-2 flex-wrap">
-                            <span class="font-medium text-primary-600 dark:text-primary-400"><i class="fas fa-chinese-yuan"></i> จีน</span>
-                            <button class="arrow-back-btn" data-lang="zh" data-text-id="zhResult" title="นำข้อความนี้ไปแปลซ้ำ">
-                                <i class="fas fa-arrow-left arrow-left-icon"></i>
-                                <i class="fas fa-arrow-up arrow-up-icon"></i>
-                            </button>
-                        </div>
-                        <div class="flex gap-2">
-                            <button class="speaker-btn" data-lang="zh" data-text-id="zhResult"><i class="fas fa-volume-up"></i></button>
-                        </div>
-                        <p id="zhResult" class="w-full text-gray-800 dark:text-gray-200 break-words mt-1">-</p>
                     </div>
                 </div>
-
-                <div class="mt-4 pt-3 border-t border-gray-200 dark:border-gray-700">
-                    <label class="block text-sm font-medium mb-1 flex items-center gap-2"><i class="fas fa-pen-alt text-primary-500"></i> คำอ่านภาษาไทย (ป้อนเอง)</label>
-                    <textarea id="customPronounceInput" rows="2" class="w-full border border-gray-300 dark:border-gray-600 rounded-xl p-2 bg-gray-50 dark:bg-gray-700/50 focus:ring-2 focus:ring-primary-400 resize-none" placeholder="เช่น สวัสดี อ่านว่า สะ-หวัด-ดี ..."></textarea>
-                    <p class="text-xs text-gray-400 mt-1">*คุณสามารถใส่คำอ่านที่ต้องการเอง ก่อนบันทึกคำศัพท์</p>
+                
+                <div id="notesListContainer" class="space-y-4 max-h-[800px] overflow-y-auto pr-2 custom-scrollbar pb-6">
+                    <div class="text-center text-pink-300 py-20 flex flex-col items-center">
+                        <i class="fas fa-book-heart text-6xl mb-4"></i>
+                        <p class="text-lg">เลือกสมุดเพื่อดูบันทึกของคุณ 📝</p>
+                    </div>
                 </div>
-
-                <div class="mt-5 flex justify-end">
-                    <button id="saveVocabularyBtn" class="save-btn-gradient"><i class="fas fa-save"></i> บันทึกคำศัพท์ชุดนี้</button>
-                </div>
-                <p class="text-xs text-gray-400 mt-2 text-right">*กดปุ่มลำโพงเพื่อฟังเสียง • กดปุ่มลูกศร (← บน PC, ↑ บนมือถือ) เพื่อนำข้อความไปแปลอีกครั้ง</p>
-            </div>
-        </div>
-
-        <!-- คำศัพท์ที่บันทึกไว้ -->
-        <div class="order-3 lg:order-none lg:col-span-1 bg-white dark:bg-gray-800 rounded-2xl shadow-sm border border-gray-100 dark:border-gray-700 p-5">
-            <div class="flex justify-between items-center mb-3">
-                <h3 class="font-bold text-lg flex items-center gap-2"><i class="fas fa-bookmark text-primary-500"></i> คำศัพท์ที่บันทึกไว้</h3>
-                <button id="clearAllHistoryBtn" class="text-xs text-red-500 hover:text-red-700 dark:text-red-400"><i class="fas fa-trash-alt"></i> ลบทั้งหมด</button>
-            </div>
-            <div class="mb-3 search-wrapper">
-                <i class="fas fa-search absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400"></i>
-                <input type="text" id="searchSaved" placeholder="ค้นหาคำศัพท์ (ข้อความต้นทาง / คำแปล / คำอ่าน)" 
-                       class="w-full pl-9 pr-8 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 focus:ring-2 focus:ring-primary-400">
-                <i id="clearSearchBtn" class="fas fa-times clear-search hidden cursor-pointer" title="ล้างข้อความค้นหา"></i>
-            </div>
-            <div id="savedEntriesContainer" class="space-y-3 max-h-[400px] overflow-y-auto pr-1">
-                <div class="text-center text-gray-400 py-6 text-sm">กำลังโหลดข้อมูล...</div>
             </div>
         </div>
     </div>
 </div>
 
-<!-- Modal Login/Register -->
-<div id="authModal" class="modal-backdrop hidden">
-    <div class="modal-content bg-white dark:bg-gray-800 rounded-2xl shadow-xl p-6 relative">
+<div id="previewModal" class="modal-backdrop hidden fixed inset-0 bg-pink-900/60 backdrop-blur-md flex items-center justify-center z-[70] p-4" onclick="closePreviewModal()">
+    <div class="bg-white rounded-[2rem] w-full max-w-2xl shadow-2xl transform transition-all border-4 border-pink-50 max-h-[90vh] flex flex-col fade-in-up" onclick="event.stopPropagation()">
+        <div class="p-6 border-b border-pink-50 flex justify-between items-start bg-pink-50/30 rounded-t-[1.8rem]">
+            <h2 id="previewModalTitle" class="text-3xl font-bold text-gray-800 flex-1 pr-4 leading-tight">หัวข้อ...</h2>
+            <button onclick="closePreviewModal()" class="text-gray-400 hover:text-pink-500 text-2xl transition bg-white w-10 h-10 rounded-full shadow-sm flex items-center justify-center"><i class="fas fa-times"></i></button>
+        </div>
+        
+        <div class="p-6 overflow-y-auto custom-scrollbar flex-1">
+            <div id="previewModalImageContainer" class="mb-6 hidden text-center">
+                <img id="previewModalImage" src="" class="max-w-full max-h-80 object-contain rounded-2xl mx-auto shadow-md border-2 border-pink-50 cursor-pointer" onclick="openImageViewer(this.src)" title="ดูรูปเต็ม">
+            </div>
+            <div id="previewModalFields" class="space-y-4">
+                </div>
+        </div>
+        
+        <div class="p-4 border-t border-pink-50 bg-gray-50 rounded-b-[1.8rem] flex justify-end">
+            <button id="previewEditBtn" class="bg-blue-50 hover:bg-blue-100 text-blue-600 px-6 py-2 rounded-xl font-medium transition shadow-sm flex items-center gap-2"><i class="fas fa-pen"></i> แก้ไขหน้านี้</button>
+        </div>
+    </div>
+</div>
+
+<div id="categoryModal" class="modal-backdrop hidden fixed inset-0 bg-pink-900/40 backdrop-blur-sm flex items-center justify-center z-50 p-4">
+    <div class="bg-white rounded-[2rem] w-full max-w-sm p-8 shadow-2xl transform transition-all border-4 border-pink-50 flex flex-col items-center relative fade-in-up">
+        <button id="closeCategoryX" class="absolute top-6 right-6 text-gray-400 hover:text-pink-500 text-xl"><i class="fas fa-times"></i></button>
+        <h3 class="text-2xl font-bold text-rose-500 mb-6">เพิ่มสมุดเล่มใหม่ 📚</h3>
+        
+        <div class="mb-6 flex flex-col items-center group relative">
+            <button type="button" onclick="openGlobalIconPicker('categoryModal')" class="w-28 h-28 bg-pink-50 hover:bg-pink-100 rounded-full border-4 border-pink-200 flex items-center justify-center text-6xl transition-transform hover:scale-105 shadow-sm overflow-hidden z-10">
+                <span id="categoryIconPreview">🌸</span>
+            </button>
+            <div class="absolute -bottom-3 bg-pink-500 text-white text-[10px] px-3 py-1 rounded-full opacity-80 z-20 pointer-events-none">คลิกเพื่อเปลี่ยนรูป</div>
+        </div>
+
+        <div class="w-full mb-6 relative">
+            <label class="block text-sm font-medium mb-2 text-center text-gray-600">ตั้งชื่อสมุดของคุณ</label>
+            <input type="text" id="newCategoryName" class="w-full border-2 border-pink-100 rounded-2xl p-3 pr-10 focus:outline-none focus:border-pink-400 text-center text-lg font-medium text-pink-600" placeholder="พิมพ์ชื่อสมุด...">
+            <button type="button" class="mic-btn absolute right-3 bottom-3 text-gray-400 hover:text-pink-500" data-target="newCategoryName"><i class="fas fa-microphone"></i></button>
+        </div>
+
+        <button id="confirmCategoryBtn" class="btn-primary w-full py-3 text-lg mt-auto">สร้างสมุดเลย!</button>
+    </div>
+</div>
+
+<div id="globalIconPickerModal" class="modal-backdrop hidden fixed inset-0 bg-pink-900/60 backdrop-blur-md flex items-center justify-center z-[60] p-4">
+    <div class="bg-white rounded-[2rem] w-full max-w-2xl p-6 shadow-2xl transform transition-all border-4 border-pink-50 max-h-[90vh] flex flex-col fade-in-up">
         <div class="flex justify-between items-center mb-4">
-            <h3 id="authModalTitle" class="text-xl font-bold">เข้าสู่ระบบ</h3>
-            <button id="closeAuthModal" class="text-gray-500 hover:text-gray-700"><i class="fas fa-times text-xl"></i></button>
+            <h3 class="text-xl font-bold text-rose-500"><i class="fas fa-icons mr-2"></i>เลือกไอคอนน่ารักๆ ✨</h3>
+            <button id="closeIconPickerX" class="text-gray-400 text-2xl hover:text-pink-500 transition"><i class="fas fa-times"></i></button>
         </div>
-        <form id="authForm">
-            <div class="mb-3">
-                <label class="block text-sm font-medium mb-1">อีเมล</label>
-                <input type="email" id="authEmail" class="w-full border rounded-lg p-2 dark:bg-gray-700" required>
-            </div>
-            <div class="mb-3">
-                <label class="block text-sm font-medium mb-1">รหัสผ่าน</label>
-                <input type="password" id="authPassword" class="w-full border rounded-lg p-2 dark:bg-gray-700" required>
-            </div>
-            <div class="flex justify-end gap-2 mt-4">
-                <button type="button" id="cancelAuthBtn" class="btn-outline px-4 py-2">ยกเลิก</button>
-                <button type="submit" id="submitAuthBtn" class="btn-primary px-4 py-2">เข้าสู่ระบบ</button>
-            </div>
-            <div id="authError" class="text-red-500 text-sm mt-2 hidden"></div>
-        </form>
-        <div class="relative my-4">
-            <div class="absolute inset-0 flex items-center"><div class="w-full border-t border-gray-300 dark:border-gray-600"></div></div>
-            <div class="relative flex justify-center text-sm"><span class="px-2 bg-white dark:bg-gray-800 text-gray-500">หรือ</span></div>
+        <div class="flex gap-2 overflow-x-auto custom-scrollbar pb-3 mb-2 text-sm" id="iconFilterContainer">
+            <button class="icon-filter-btn bg-pink-500 text-white px-4 py-1.5 rounded-full font-medium shadow-sm flex-shrink-0" data-filter="all">🌟 ทั้งหมด</button>
+            <button class="icon-filter-btn bg-gray-100 hover:bg-pink-100 text-gray-600 px-4 py-1.5 rounded-full font-medium transition flex-shrink-0" data-filter="faces">😀 อารมณ์</button>
+            <button class="icon-filter-btn bg-gray-100 hover:bg-pink-100 text-gray-600 px-4 py-1.5 rounded-full font-medium transition flex-shrink-0" data-filter="nature">🐶 ธรรมชาติ</button>
+            <button class="icon-filter-btn bg-gray-100 hover:bg-pink-100 text-gray-600 px-4 py-1.5 rounded-full font-medium transition flex-shrink-0" data-filter="food">🍔 อาหาร</button>
+            <button class="icon-filter-btn bg-gray-100 hover:bg-pink-100 text-gray-600 px-4 py-1.5 rounded-full font-medium transition flex-shrink-0" data-filter="activity">⚽️ กิจกรรม</button>
+            <button class="icon-filter-btn bg-gray-100 hover:bg-pink-100 text-gray-600 px-4 py-1.5 rounded-full font-medium transition flex-shrink-0" data-filter="travel">✈️ ท่องเที่ยว</button>
+            <button class="icon-filter-btn bg-gray-100 hover:bg-pink-100 text-gray-600 px-4 py-1.5 rounded-full font-medium transition flex-shrink-0" data-filter="objects">🎁 สิ่งของ</button>
+            <button class="icon-filter-btn bg-gray-100 hover:bg-pink-100 text-gray-600 px-4 py-1.5 rounded-full font-medium transition flex-shrink-0" data-filter="symbols">💖 สัญลักษณ์</button>
         </div>
-        <button id="googleSignInBtn" class="google-btn"><i class="fab fa-google text-red-500"></i> เข้าสู่ระบบด้วย Google</button>
-        <div class="text-center text-sm text-gray-500 mt-3">
-            <span id="toggleAuthMode" class="text-primary-600 cursor-pointer hover:underline">ยังไม่มีบัญชี? สมัครสมาชิก</span>
+        <div class="flex-1 overflow-y-auto custom-scrollbar bg-pink-50/50 rounded-2xl p-4 border-2 border-pink-50">
+            <div class="flex flex-wrap gap-2 text-3xl justify-center" id="globalIconContainer"></div>
         </div>
+    </div>
+</div>
+
+<div id="imageViewerModal" class="modal-backdrop hidden fixed inset-0 bg-black/90 backdrop-blur-md flex items-center justify-center z-[80] p-4" onclick="closeImageViewer()">
+    <div class="relative w-full h-full flex justify-center items-center">
+        <button class="absolute top-4 right-4 md:top-8 md:right-8 text-white/70 hover:text-white text-5xl z-50 transition transform hover:rotate-90"><i class="fas fa-times"></i></button>
+        <img id="fullSizeImage" src="" class="max-w-full max-h-full object-contain rounded-xl shadow-2xl fade-in-up" onclick="event.stopPropagation()">
     </div>
 </div>
 
 <script>
-    // Firebase config
+    // ----------------------------------------------------
+    // ส่วนที่ 1: Service Worker สำหรับการติดตั้งเป็นแอป (PWA)
+    // ----------------------------------------------------
+    if ('serviceWorker' in navigator) {
+        window.addEventListener('load', () => {
+            navigator.serviceWorker.register('sw.js').catch(err => {
+                console.log('Service Worker registration failed:', err);
+            });
+        });
+    }
+
+    // ----------------------------------------------------
+    // ส่วนที่ 2: ตั้งค่า Firebase
+    // ----------------------------------------------------
     const firebaseConfig = {
         apiKey: "AIzaSyBU9M5C5Q6yIdlvjEQsUpxcYOjHKV_JRc4",
         authDomain: "fmpro-d66c3.firebaseapp.com",
@@ -293,528 +376,1069 @@
     firebase.initializeApp(firebaseConfig);
     const auth = firebase.auth();
     const db = firebase.firestore();
-    const googleProvider = new firebase.auth.GoogleAuthProvider();
 
-    // State
+    // ----------------------------------------------------
+    // ส่วนที่ 3: ตัวแปรและการเตรียมข้อมูลระบบ
+    // ----------------------------------------------------
     let currentUser = null;
-    let currentTranslations = { th: "", en: "", zh: "" };
-    let currentSourceText = "";
-    let currentSourceLang = "auto";
-    let searchQuery = "";
-    let allVocabularies = [];
+    let categories = [];
+    let noteEntries = [];
+    let selectedCategoryId = null;
+    let searchTerm = "";
+    let selectedIcon = "🌸"; 
+    let autoTranslateDebounce = null;
+    const translationCache = {};
+    let currentImageBase64 = ""; 
+    let iconPickerTarget = null;
+    
+    // โหลดค่า View Mode จาก LocalStorage (ถ้าไม่มีให้เป็น 'content')
+    let currentViewMode = localStorage.getItem('notebook_view_mode') || 'content';
 
-    // DOM elements
-    const sourceLangSelect = document.getElementById('sourceLangSelect');
-    const inputTextArea = document.getElementById('inputText');
-    const translateBtn = document.getElementById('translateBtn');
-    const voiceInputBtn = document.getElementById('voiceInputBtn');
-    const clearInputBtn = document.getElementById('clearInputBtn');
-    const saveVocabBtn = document.getElementById('saveVocabularyBtn');
-    const savedContainer = document.getElementById('savedEntriesContainer');
-    const clearHistoryBtn = document.getElementById('clearAllHistoryBtn');
-    const darkModeToggle = document.getElementById('darkModeToggle');
-    const customPronounceInput = document.getElementById('customPronounceInput');
-    const detectedLangInfo = document.getElementById('detectedLangInfo');
-    const searchInput = document.getElementById('searchSaved');
-    const clearSearchBtn = document.getElementById('clearSearchBtn');
-    const resetLangBtn = document.getElementById('resetLangBtn');
+    const colorMap = {
+        pink: { bg: 'bg-pink-200', border: 'border-pink-500', badgeBg: 'bg-pink-100', badgeText: 'text-pink-700' },
+        blue: { bg: 'bg-blue-200', border: 'border-blue-500', badgeBg: 'bg-blue-100', badgeText: 'text-blue-700' },
+        emerald: { bg: 'bg-emerald-200', border: 'border-emerald-500', badgeBg: 'bg-emerald-100', badgeText: 'text-emerald-700' },
+        amber: { bg: 'bg-amber-200', border: 'border-amber-500', badgeBg: 'bg-amber-100', badgeText: 'text-amber-700' },
+        purple: { bg: 'bg-purple-200', border: 'border-purple-500', badgeBg: 'bg-purple-100', badgeText: 'text-purple-700' },
+        gray: { bg: 'bg-gray-200', border: 'border-gray-500', badgeBg: 'bg-gray-100', badgeText: 'text-gray-700' }
+    };
 
-    const thResultEl = document.getElementById('thResult');
-    const enResultEl = document.getElementById('enResult');
-    const zhResultEl = document.getElementById('zhResult');
+    const emojiList = {
+        faces: ["😀","😃","😄","😁","😆","😅","😂","🤣","🥲","☺️","😊","😇","😍","🥰","😘","😋","😛","🤪","😎","🤓","🥳"],
+        nature: ["🐶","🐱","🐭","🐹","🐰","🦊","🐻","🐼","🐻‍❄️","🐨","🐯","🦁","🐮","🐷","🐸","🐵","🐔","🐧","🐦","🦋","🌸","🌺","🌻","🌼","🍀","🌲","🍄","🌞","🌝","🌙","⭐️","🌈","🔥","💧","❄️"],
+        food: ["🍏","🍎","🍐","🍊","🍋","🍌","🍉","🍇","🍓","🫐","🍈","🍒","🍑","🥭","🍍","🥥","🥝","🍅","🥑","🥦","🥐","🍞","🥞","🥓","🥩","🍔","🍟","🍕","🌭","🥪","🌮","🥗","🍜","🍣","🍱","🍨","🍦","🍰","🎂","🍮","🍭","🍬","🍫","🍿","🍩","🍪","☕️","🍵","🥤","🍺","🍷","🍹"],
+        activity: ["⚽️","🏀","🏈","⚾️","🎾","🏐","🎱","🏓","🏸","🥊","🛹","🎿","🏋️‍♀️","🤸‍♀️","🏊‍♀️","🚴‍♀️","🏆","🏅","🎨","🎬","🎤","🎧","🎼","🎹","🥁","🎸","🎻","🎲","🎯","🎮","🧩"],
+        travel: ["🚗","🚕","🚙","🚌","🚎","🏎","🚓","🚑","🚒","🛴","🚲","🛵","🏍","✈️","🛫","🚀","🛸","🚁","🛶","⛵️","🚤","🛳","🚢","🗺","🗽","🗼","🏰","🎡","🎢","🎠","⛲️","🏖","🏝","🏜","🌋","⛰","🏕","⛺️","🏠","🏡","🏢","🏥","🏦","🏫"],
+        objects: ["⌚️","📱","💻","⌨️","🖥","🖨","🖱","💽","💾","💿","📷","📸","📹","🎥","📞","☎️","📺","📻","🎙","⏱","⏰","⏳","🔋","💡","🔦","🕯","💸","💵","💶","🪙","💰","💳","💎","⚖️","🧰","🪛","🔧","🔨","🧹","🧺","🧻","🚽","🛁","🧼","🧸","🖼","🛍","🛒","🎁","🎈","🎀","🎊","🎉","✉️","📦","🏷","📜","📄","📊","📈","📅","🗑","📂","📰","📓","📔","📒","📕","📗","📘","📙","📚","📖","🔖","🔗","📎","📏","📌","📍","✂️","🖊","🖋","🖍","📝","✏️","🔍","🔒","🔓"],
+        symbols: ["❤️","🧡","💛","💚","💙","💜","🖤","🤍","🤎","💔","❣️","💕","💞","💓","💗","💖","💘","💝","💟","☮️","✝️","☪️","🕉","☸️","✡️","☯️","✅","❎","💯","💢","♨️","⚠️","🔰","♻️","🌐","🌀","💤"]
+    };
 
-    // Auth elements
-    const authButtons = document.getElementById('authButtons');
-    const userInfo = document.getElementById('userInfo');
+    // ----------------------------------------------------
+    // ส่วนที่ 4: การเข้าถึง Elements ต่างๆ ในหน้าเว็บ
+    // ----------------------------------------------------
+    const appTitle = document.getElementById('appTitle');
+    const editTitleBtn = document.getElementById('editTitleBtn');
+    
+    const mainTitleField = document.getElementById('mainTitleField');
+    const dynamicFieldsContainer = document.getElementById('dynamicFieldsContainer');
+    const addDynamicFieldBtn = document.getElementById('addDynamicFieldBtn');
+    const editIdInput = document.getElementById('editId');
+    const clearFormBtn = document.getElementById('clearFormBtn');
+    const cancelEditBtn = document.getElementById('cancelEditBtn');
+    const submitBtnText = document.getElementById('submitBtnText');
+    const noteForm = document.getElementById('noteForm');
+    
+    const triggerImageBtn = document.getElementById('triggerImageBtn');
+    const imageInput = document.getElementById('imageInput');
+    const imagePreviewContainer = document.getElementById('imagePreviewContainer');
+    const imagePreview = document.getElementById('imagePreview');
+    const removeImageBtn = document.getElementById('removeImageBtn');
+    
+    const imageViewerModal = document.getElementById('imageViewerModal');
+    const fullSizeImage = document.getElementById('fullSizeImage');
+
+    const translationToolContainer = document.getElementById('translationToolContainer');
+    const autoTranslateInput = document.getElementById('autoTranslateInput');
+    const autoEnResult = document.getElementById('autoEnResult');
+    const autoZhResult = document.getElementById('autoZhResult');
+    const autoThResult = document.getElementById('autoThResult');
+
+    const categoryTabsContainer = document.getElementById('categoryTabsContainer');
+    const notesListContainer = document.getElementById('notesListContainer');
+    const selectedCategoryNameSpan = document.getElementById('selectedCategoryName');
+    const categoryActionsDiv = document.getElementById('categoryActions');
+    const searchInput = document.getElementById('searchNote');
+
+    const categoryModal = document.getElementById('categoryModal');
+    const addCategoryBtn = document.getElementById('addCategoryBtn');
+    const closeCategoryX = document.getElementById('closeCategoryX');
+    const newCategoryNameInput = document.getElementById('newCategoryName');
+    const confirmCategoryBtn = document.getElementById('confirmCategoryBtn');
+    const categoryIconPreview = document.getElementById('categoryIconPreview');
+    
+    const globalIconPickerModal = document.getElementById('globalIconPickerModal');
+    const closeIconPickerX = document.getElementById('closeIconPickerX');
+    const globalIconContainer = document.getElementById('globalIconContainer');
+    const iconFilterBtns = document.querySelectorAll('.icon-filter-btn');
+    
+    const loginBtn = document.getElementById('loginBtn');
+    const logoutBtn = document.getElementById('logoutBtn');
+    const authButtonsDiv = document.getElementById('authButtons');
+    const userInfoDiv = document.getElementById('userInfo');
     const userEmailSpan = document.getElementById('userEmail');
     const userAvatar = document.getElementById('userAvatar');
-    const loginBtn = document.getElementById('loginBtn');
-    const registerBtn = document.getElementById('registerBtn');
-    const logoutBtn = document.getElementById('logoutBtn');
-    const googleSignInBtn = document.getElementById('googleSignInBtn');
-    const authModal = document.getElementById('authModal');
-    const authModalTitle = document.getElementById('authModalTitle');
-    const submitAuthBtn = document.getElementById('submitAuthBtn');
-    const authEmail = document.getElementById('authEmail');
-    const authPassword = document.getElementById('authPassword');
-    const authError = document.getElementById('authError');
-    const toggleAuthMode = document.getElementById('toggleAuthMode');
-    const closeAuthModal = document.getElementById('closeAuthModal');
-    const cancelAuthBtn = document.getElementById('cancelAuthBtn');
-    const authForm = document.getElementById('authForm');
 
-    // Cache
-    const CACHE_KEY = "translation_cache_v2";
-    let translationCache = {};
-    function loadCache() {
-        const stored = localStorage.getItem(CACHE_KEY);
-        if (stored) { try { translationCache = JSON.parse(stored); } catch(e) { translationCache = {}; } }
+    // ส่วนสำหรับ View Mode และ Preview
+    const viewModeSelector = document.getElementById('viewModeSelector');
+    if (viewModeSelector) {
+        viewModeSelector.value = currentViewMode;
     }
-    function saveCache() { localStorage.setItem(CACHE_KEY, JSON.stringify(translationCache)); }
-    function getCacheKey(text, srcLang, tgtLang) { return `${srcLang}|${tgtLang}|${text}`; }
-    function getCachedTranslation(text, srcLang, tgtLang) {
-        return translationCache[getCacheKey(text, srcLang, tgtLang)] || null;
-    }
-    function setCachedTranslation(text, srcLang, tgtLang, result) {
-        translationCache[getCacheKey(text, srcLang, tgtLang)] = result;
-        saveCache();
+    const previewModal = document.getElementById('previewModal');
+    const previewEditBtn = document.getElementById('previewEditBtn');
+
+
+    // ----------------------------------------------------
+    // ส่วนที่ 5: ฟังก์ชันพื้นฐานและการแก้ไขชื่อแอป
+    // ----------------------------------------------------
+    function escapeHtml(s) { 
+        if (!s) return ''; 
+        return s.replace(/[&<>]/g, m => ({'&':'&amp;','<':'&lt;','>':'&gt;'}[m])); 
     }
 
-    // Helpers
+    editTitleBtn.addEventListener('click', () => {
+        appTitle.contentEditable = "true";
+        appTitle.focus();
+        document.execCommand('selectAll', false, null);
+    });
+
+    appTitle.addEventListener('blur', async () => {
+        appTitle.contentEditable = "false";
+        const newTitle = appTitle.innerText.trim() || "My Notebook 🌸";
+        appTitle.innerText = newTitle;
+        if (currentUser) {
+            await db.collection('users').doc(currentUser.uid).set({ appTitle: newTitle }, { merge: true });
+        }
+    });
+
+    appTitle.addEventListener('keydown', (e) => {
+        if(e.key === 'Enter') { 
+            e.preventDefault(); 
+            appTitle.blur(); 
+        }
+    });
+
+    async function loadAppTitle() {
+        if(!currentUser) return;
+        const doc = await db.collection('users').doc(currentUser.uid).get();
+        if(doc.exists && doc.data().appTitle) { 
+            appTitle.innerText = doc.data().appTitle; 
+        } else { 
+            appTitle.innerText = "My Notebook 🌸"; 
+        }
+    }
+
+
+    // ----------------------------------------------------
+    // ส่วนที่ 6: ตัวเลือกไอคอน 1,000+ แบบ (Icon Picker)
+    // ----------------------------------------------------
+    function openGlobalIconPicker(target) {
+        iconPickerTarget = target;
+        globalIconPickerModal.classList.remove('hidden');
+        renderIcons('all');
+        
+        iconFilterBtns.forEach(b => {
+            b.className = "icon-filter-btn bg-gray-100 hover:bg-pink-100 text-gray-600 px-4 py-1.5 rounded-full font-medium transition flex-shrink-0";
+        });
+        iconFilterBtns[0].className = "icon-filter-btn bg-pink-500 text-white px-4 py-1.5 rounded-full font-medium shadow-sm flex-shrink-0";
+    }
+
+    closeIconPickerX.addEventListener('click', () => {
+        globalIconPickerModal.classList.add('hidden');
+    });
+
+    iconFilterBtns.forEach(btn => {
+        btn.addEventListener('click', () => {
+            iconFilterBtns.forEach(b => {
+                b.className = "icon-filter-btn bg-gray-100 hover:bg-pink-100 text-gray-600 px-4 py-1.5 rounded-full font-medium transition flex-shrink-0";
+            });
+            btn.className = "icon-filter-btn bg-pink-500 text-white px-4 py-1.5 rounded-full font-medium shadow-sm flex-shrink-0";
+            renderIcons(btn.getAttribute('data-filter'));
+        });
+    });
+
+    function renderIcons(filter) {
+        globalIconContainer.innerHTML = '';
+        let iconsToRender = [];
+        if (filter === 'all') {
+            iconsToRender = [].concat(...Object.values(emojiList));
+        } else {
+            iconsToRender = emojiList[filter] || [];
+        }
+        
+        iconsToRender.forEach(icon => {
+            const span = document.createElement('span');
+            span.className = 'icon-option bg-white shadow-sm border border-pink-50 hover:border-pink-300';
+            
+            if (iconPickerTarget === 'categoryModal' && selectedIcon === icon) {
+                span.classList.add('selected');
+            } else if (iconPickerTarget instanceof HTMLElement && iconPickerTarget.getAttribute('data-icon') === icon) {
+                span.classList.add('selected');
+            }
+            
+            span.innerText = icon;
+            span.onclick = () => selectIcon(icon);
+            globalIconContainer.appendChild(span);
+        });
+    }
+
+    function selectIcon(icon) {
+        if (iconPickerTarget === 'categoryModal') {
+            selectedIcon = icon;
+            if(categoryIconPreview) categoryIconPreview.innerText = icon;
+        } else if (iconPickerTarget instanceof HTMLElement) {
+            iconPickerTarget.innerText = icon;
+            iconPickerTarget.setAttribute('data-icon', icon);
+        }
+        globalIconPickerModal.classList.add('hidden');
+    }
+
+
+    // ----------------------------------------------------
+    // ส่วนที่ 7: อัปโหลดรูปภาพและบีบอัด
+    // ----------------------------------------------------
+    function openImageViewer(src) { 
+        fullSizeImage.src = src; 
+        imageViewerModal.classList.remove('hidden'); 
+    }
+    function closeImageViewer() { 
+        imageViewerModal.classList.add('hidden'); 
+        fullSizeImage.src = ""; 
+    }
+
+    triggerImageBtn.addEventListener('click', () => { 
+        imageInput.click(); 
+    });
+
+    imageInput.addEventListener('change', function(e) {
+        const file = e.target.files[0];
+        if (!file) return;
+        
+        const reader = new FileReader();
+        reader.onload = function(event) {
+            const img = new Image();
+            img.onload = function() {
+                const canvas = document.createElement('canvas');
+                const MAX_WIDTH = 800; 
+                const MAX_HEIGHT = 800;
+                let width = img.width; 
+                let height = img.height;
+                
+                if (width > height) { 
+                    if (width > MAX_WIDTH) { height *= MAX_WIDTH / width; width = MAX_WIDTH; } 
+                } else { 
+                    if (height > MAX_HEIGHT) { width *= MAX_HEIGHT / height; height = MAX_HEIGHT; } 
+                }
+                canvas.width = width; 
+                canvas.height = height;
+                
+                const ctx = canvas.getContext('2d');
+                ctx.drawImage(img, 0, 0, width, height);
+                
+                currentImageBase64 = canvas.toDataURL('image/jpeg', 0.7); 
+                imagePreview.src = currentImageBase64;
+                imagePreviewContainer.classList.remove('hidden');
+                triggerImageBtn.classList.add('hidden');
+            }
+            img.src = event.target.result;
+        }
+        reader.readAsDataURL(file);
+    });
+
+    removeImageBtn.addEventListener('click', () => {
+        currentImageBase64 = ""; 
+        imageInput.value = "";
+        imagePreviewContainer.classList.add('hidden'); 
+        triggerImageBtn.classList.remove('hidden');
+    });
+
+
+    // ----------------------------------------------------
+    // ส่วนที่ 8: ฟังก์ชันไมโครโฟนพิมพ์ด้วยเสียง
+    // ----------------------------------------------------
+    const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+    function attachMicEvents() {
+        document.querySelectorAll('.mic-btn').forEach(btn => { 
+            btn.replaceWith(btn.cloneNode(true)); 
+        });
+        document.querySelectorAll('.mic-btn').forEach(btn => {
+            btn.addEventListener('click', (e) => {
+                e.preventDefault();
+                if (!SpeechRecognition) { 
+                    alert("เบราว์เซอร์นี้ไม่รองรับการพิมพ์ด้วยเสียงค่ะ 🥺"); 
+                    return; 
+                }
+                const targetId = btn.getAttribute('data-target');
+                const targetInput = document.getElementById(targetId) || btn.previousElementSibling;
+                
+                if (btn.classList.contains('recording')) return;
+                
+                const recognition = new SpeechRecognition();
+                recognition.lang = 'th-TH'; 
+                recognition.interimResults = false;
+                recognition.start(); 
+                btn.classList.add('recording');
+                
+                recognition.onresult = (event) => {
+                    const transcript = event.results[0][0].transcript;
+                    const currentValue = targetInput.value;
+                    targetInput.value = currentValue ? currentValue + " " + transcript : transcript;
+                    targetInput.dispatchEvent(new Event('input')); 
+                };
+                recognition.onend = () => btn.classList.remove('recording');
+                recognition.onerror = () => btn.classList.remove('recording');
+            });
+        });
+    }
+
+    function speakResult(elementId, lang) {
+        const text = document.getElementById(elementId).innerText;
+        if (!text || text === '-' || text.includes('loading-spinner')) return;
+        const utterance = new SpeechSynthesisUtterance(text);
+        utterance.lang = lang; 
+        utterance.rate = 0.9; 
+        speechSynthesis.speak(utterance);
+    }
+
+
+    // ----------------------------------------------------
+    // ส่วนที่ 9: ฟังก์ชันแปลภาษา Google Translate
+    // ----------------------------------------------------
     function detectLanguageBasic(text) {
         if (/[\u0E00-\u0E7F]/.test(text)) return 'th';
-        if (/[\u4E00-\u9FFF]/.test(text)) return 'zh';
+        if (/[\u4E00-\u9FFF]/.test(text)) return 'zh'; 
         return 'en';
     }
-    function toMyMemoryLangCode(lang) {
-        if (lang === 'th') return 'th';
-        if (lang === 'en') return 'en';
-        if (lang === 'zh') return 'zh-CN';
-        return 'en';
-    }
-
-    // Translation API (MyMemory)
-    async function translateWithMyMemory(text, sourceLang, targetLang, retry = 0) {
-        if (!text || text.trim() === "") return null;
-        const src = toMyMemoryLangCode(sourceLang);
-        const tgt = toMyMemoryLangCode(targetLang);
-        const url = `https://api.mymemory.translated.net/get?q=${encodeURIComponent(text)}&langpair=${src}|${tgt}`;
-        try {
-            const res = await fetch(url);
-            const data = await res.json();
-            if (data && data.responseData && data.responseData.translatedText) {
-                let translated = data.responseData.translatedText;
-                if (translated === text && src !== tgt && retry < 2) {
-                    await new Promise(r => setTimeout(r, 500));
-                    return translateWithMyMemory(text, sourceLang, targetLang, retry + 1);
-                }
-                setCachedTranslation(text, sourceLang, targetLang, translated);
-                return translated;
-            }
-            return null;
-        } catch(e) { return null; }
-    }
-
-    async function translateText(text, sourceLang, targetLang) {
+    
+    async function translateText(text, srcLang, tgtLang) {
         if (!text) return "";
-        const cached = getCachedTranslation(text, sourceLang, targetLang);
-        if (cached !== null) return cached;
-        const result = await translateWithMyMemory(text, sourceLang, targetLang);
-        return result !== null ? result : null;
-    }
-
-    async function performFullTranslation(sourceText, sourceLangChoice) {
-        if (!sourceText.trim()) return { th: "", en: "", zh: "" };
-        let actualSourceLang = sourceLangChoice;
-        if (actualSourceLang === 'auto') {
-            actualSourceLang = detectLanguageBasic(sourceText);
-            const langName = actualSourceLang === 'th' ? 'ไทย' : (actualSourceLang === 'en' ? 'อังกฤษ' : 'จีน');
-            window.detectedLangMessage = `🔍 ตรวจพบภาษา: ${langName}`;
-        } else {
-            window.detectedLangMessage = null;
-        }
-
-        let thResult, enResult, zhResult;
-        if (actualSourceLang === 'th') {
-            thResult = sourceText;
-            enResult = await translateText(sourceText, 'th', 'en');
-            zhResult = await translateText(sourceText, 'th', 'zh');
-        } else if (actualSourceLang === 'en') {
-            enResult = sourceText;
-            thResult = await translateText(sourceText, 'en', 'th');
-            zhResult = await translateText(sourceText, 'en', 'zh');
-        } else {
-            zhResult = sourceText;
-            thResult = await translateText(sourceText, 'zh', 'th');
-            enResult = await translateText(sourceText, 'zh', 'en');
-        }
-
-        return {
-            th: thResult === null ? "⚠️ ไม่สามารถแปลได้" : (thResult || ""),
-            en: enResult === null ? "⚠️ ไม่สามารถแปลได้" : (enResult || ""),
-            zh: zhResult === null ? "⚠️ ไม่สามารถแปลได้" : (zhResult || "")
-        };
-    }
-
-    async function handleTranslation() {
-        const rawText = inputTextArea.value.trim();
-        if (!rawText) { alert("กรุณาพิมพ์หรือพูดข้อความก่อนแปล"); return; }
-        currentSourceText = rawText;
-        currentSourceLang = sourceLangSelect.value;
-        translateBtn.disabled = true;
-        translateBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i>';
+        const key = `${srcLang}|${tgtLang}|${text}`;
+        if (translationCache[key]) return translationCache[key];
+        
+        const src = srcLang === 'zh' ? 'zh-CN' : srcLang; 
+        const tgt = tgtLang === 'zh' ? 'zh-CN' : tgtLang;
+        
+        const url = `https://translate.googleapis.com/translate_a/single?client=gtx&sl=${src}&tl=${tgt}&dt=t&q=${encodeURIComponent(text)}`;
+        
         try {
-            const translated = await performFullTranslation(rawText, currentSourceLang);
-            currentTranslations = translated;
-            thResultEl.innerText = translated.th || "-";
-            enResultEl.innerText = translated.en || "-";
-            zhResultEl.innerText = translated.zh || "-";
-            if (window.detectedLangMessage) {
-                detectedLangInfo.textContent = window.detectedLangMessage;
-                detectedLangInfo.classList.remove('hidden');
-            } else detectedLangInfo.classList.add('hidden');
-        } catch (err) {
-            alert("เกิดข้อผิดพลาดในการแปล");
-        } finally {
-            translateBtn.disabled = false;
-            translateBtn.innerHTML = '<i class="fas fa-language"></i> แปล';
+            const res = await fetch(url); 
+            const data = await res.json();
+            if (data && data[0]) {
+                let trans = data[0].map(item => item[0]).join('');
+                if (trans === text && src !== tgt) trans = null;
+                if (trans) translationCache[key] = trans; 
+                return trans || "";
+            }
+            return "";
+        } catch(e) { return ""; }
+    }
+    
+    async function autoTranslate() {
+        const raw = autoTranslateInput.value.trim();
+        if (!raw) { 
+            autoEnResult.innerText = "-"; 
+            autoZhResult.innerText = "-"; 
+            autoThResult.innerText = "-"; 
+            return; 
         }
+        
+        const spinner = '<span class="loading-spinner"></span>';
+        autoEnResult.innerHTML = spinner; 
+        autoZhResult.innerHTML = spinner; 
+        autoThResult.innerHTML = spinner;
+        
+        const detected = detectLanguageBasic(raw);
+        let en = "", zh = "", th = "";
+        
+        if (detected === 'th') { 
+            th = raw; 
+            en = await translateText(raw, 'th', 'en'); 
+            zh = await translateText(raw, 'th', 'zh'); 
+        } else if (detected === 'en') { 
+            en = raw; 
+            th = await translateText(raw, 'en', 'th'); 
+            zh = await translateText(raw, 'en', 'zh'); 
+        } else { 
+            zh = raw; 
+            th = await translateText(raw, 'zh', 'th'); 
+            en = await translateText(raw, 'zh', 'en'); 
+        }
+        
+        autoEnResult.innerText = en || "-"; 
+        autoZhResult.innerText = zh || "-"; 
+        autoThResult.innerText = th || "-";
     }
 
-    // TTS
-    function speakText(text, langCode) {
-        if (!window.speechSynthesis) return;
-        window.speechSynthesis.cancel();
-        const utterance = new SpeechSynthesisUtterance(text);
-        if (langCode === 'th') utterance.lang = 'th-TH';
-        else if (langCode === 'en') utterance.lang = 'en-US';
-        else if (langCode === 'zh') utterance.lang = 'zh-CN';
-        utterance.rate = 0.9;
-        window.speechSynthesis.speak(utterance);
-    }
-    function attachEvents() {
-        document.querySelectorAll('.speaker-btn').forEach(btn => {
-            btn.removeEventListener('click', speakerHandler);
-            btn.addEventListener('click', speakerHandler);
-        });
-        document.querySelectorAll('.arrow-back-btn').forEach(btn => {
-            btn.removeEventListener('click', arrowBackHandler);
-            btn.addEventListener('click', arrowBackHandler);
-        });
-    }
-    function speakerHandler(e) {
-        const btn = e.currentTarget;
-        const lang = btn.getAttribute('data-lang');
-        const textId = btn.getAttribute('data-text-id');
-        const textElem = document.getElementById(textId);
-        if (textElem && textElem.innerText && textElem.innerText !== '-') speakText(textElem.innerText, lang);
-    }
-    async function arrowBackHandler(e) {
-        const btn = e.currentTarget;
-        const lang = btn.getAttribute('data-lang');
-        const textId = btn.getAttribute('data-text-id');
-        const textElem = document.getElementById(textId);
-        if (textElem && textElem.innerText && textElem.innerText !== '-') {
-            inputTextArea.value = textElem.innerText;
-            sourceLangSelect.value = lang;
-            await handleTranslation();
-        }
-    }
+    autoTranslateInput.addEventListener('input', () => {
+        if (autoTranslateDebounce) clearTimeout(autoTranslateDebounce);
+        autoTranslateDebounce = setTimeout(autoTranslate, 500);
+    });
 
-    // Firebase storage
-    function updateAuthUI(user) {
-        if (user) {
-            authButtons.classList.add('hidden');
-            userInfo.classList.remove('hidden');
-            userEmailSpan.textContent = user.email;
-            if (user.photoURL) {
-                userAvatar.src = user.photoURL;
-                userAvatar.classList.remove('hidden');
-            } else userAvatar.classList.add('hidden');
-            currentUser = user;
-            loadUserVocabularies();
-        } else {
-            authButtons.classList.remove('hidden');
-            userInfo.classList.add('hidden');
-            currentUser = null;
-            allVocabularies = [];
-            renderSavedList();
-            savedContainer.innerHTML = '<div class="text-center text-gray-400 py-6 text-sm">กรุณาเข้าสู่ระบบเพื่อดูคำศัพท์ที่บันทึกไว้</div>';
-        }
-    }
 
-    async function loadUserVocabularies() {
-        if (!currentUser) return;
-        savedContainer.innerHTML = '<div class="text-center text-gray-400 py-6 text-sm">กำลังโหลด...</div>';
-        try {
-            const snapshot = await db.collection('users').doc(currentUser.uid).collection('vocabularies').orderBy('timestamp', 'desc').get();
-            allVocabularies = [];
-            snapshot.forEach(doc => allVocabularies.push({ id: doc.id, ...doc.data() }));
-            renderSavedList();
-        } catch(e) { console.error(e); }
-    }
-    async function addVocabularyToFirestore(entry) {
-        if (!currentUser) return;
-        const docRef = await db.collection('users').doc(currentUser.uid).collection('vocabularies').add({
-            ...entry,
-            timestamp: firebase.firestore.FieldValue.serverTimestamp()
-        });
-        entry.id = docRef.id;
-        allVocabularies.unshift(entry);
-        renderSavedList();
-    }
-    async function deleteVocabularyFromFirestore(id) {
-        if (!currentUser) return;
-        if (!confirm("คุณต้องการลบคำศัพท์นี้ใช่หรือไม่?")) return;
-        await db.collection('users').doc(currentUser.uid).collection('vocabularies').doc(id).delete();
-        allVocabularies = allVocabularies.filter(v => v.id !== id);
-        renderSavedList();
-    }
-    async function updateVocabularyInFirestore(id, data) {
-        if (!currentUser) return;
-        await db.collection('users').doc(currentUser.uid).collection('vocabularies').doc(id).update(data);
-        const idx = allVocabularies.findIndex(v => v.id === id);
-        if (idx !== -1) { allVocabularies[idx] = { ...allVocabularies[idx], ...data }; renderSavedList(); }
-    }
-    async function clearAllVocabularies() {
-        if (!currentUser) return;
-        if (!confirm("คุณต้องการลบคำศัพท์ทั้งหมดใช่หรือไม่? การดำเนินการนี้ไม่สามารถกู้คืนได้")) return;
-        const batch = db.batch();
-        const snapshot = await db.collection('users').doc(currentUser.uid).collection('vocabularies').get();
-        snapshot.forEach(doc => batch.delete(doc.ref));
-        await batch.commit();
-        allVocabularies = [];
-        renderSavedList();
-    }
+    // ----------------------------------------------------
+    // ส่วนที่ 10: แบบฟอร์มเพิ่มหัวข้อย่อย (Dynamic Fields)
+    // ----------------------------------------------------
+    let fieldCounter = 0;
+    function createFieldRow(label = "", value = "", icon = "✨", color = "pink") {
+        fieldCounter++;
+        const rowId = `dyn_val_${fieldCounter}`;
+        const row = document.createElement('div');
+        row.className = "flex flex-col gap-2 items-start dynamic-field-row animate-fade-in bg-white p-3 rounded-2xl border border-pink-100 relative group shadow-sm";
+        
+        const colors = ['pink', 'blue', 'emerald', 'amber', 'purple', 'gray'];
+        let colorDots = colors.map(c => 
+            `<button type="button" data-color="${c}" class="color-dot w-5 h-5 rounded-full ${colorMap[c].bg} border-2 ${c === color ? colorMap[c].border + ' scale-110' : 'border-transparent'} transition-transform hover:scale-110 shadow-sm"></button>`
+        ).join('');
 
-    function renderSavedList() {
-        if (!savedContainer) return;
-        if (!currentUser) {
-            savedContainer.innerHTML = '<div class="text-center text-gray-400 py-6 text-sm">กรุณาเข้าสู่ระบบเพื่อดูคำศัพท์ที่บันทึกไว้</div>';
-            return;
-        }
-        const filtered = allVocabularies.filter(item => {
-            if (!searchQuery) return true;
-            const q = searchQuery.toLowerCase();
-            return [item.sourceText, item.th, item.en, item.zh, item.customPronounce].some(f => f && f.toLowerCase().includes(q));
-        });
-        if (filtered.length === 0) {
-            savedContainer.innerHTML = '<div class="text-center text-gray-400 py-6 text-sm">ไม่พบคำศัพท์ที่ค้นหา</div>';
-            return;
-        }
-        savedContainer.innerHTML = "";
-        filtered.forEach(item => {
-            const card = document.createElement('div');
-            card.className = "bg-gray-50 dark:bg-gray-700/40 rounded-xl p-3 border border-gray-200 dark:border-gray-700 text-sm saved-card";
-            let sourceLangDisplay = item.sourceLang;
-            if (sourceLangDisplay === 'auto') sourceLangDisplay = detectLanguageBasic(item.sourceText);
-            const sourceHtml = `
-                <div class="flex justify-between items-start gap-2 mb-2">
-                    <div class="flex-1 font-bold text-primary-700 dark:text-primary-300 break-words">📌 ${escapeHtml(item.sourceText)}</div>
-                    <div class="flex gap-1 flex-shrink-0">
-                        <button class="history-speaker-btn" data-text="${escapeAttr(item.sourceText)}" data-lang="${sourceLangDisplay}"><i class="fas fa-volume-up"></i></button>
-                    </div>
+        row.innerHTML = `
+            <div class="flex flex-wrap w-full gap-2 items-center pr-8">
+                <button type="button" class="field-icon-btn w-10 h-10 text-center text-xl border border-pink-200 rounded-xl hover:bg-pink-50 focus:outline-none bg-white shadow-sm flex items-center justify-center transition-transform hover:scale-105" data-icon="${escapeHtml(icon)}">
+                    ${escapeHtml(icon)}
+                </button>
+                <input type="text" placeholder="ชื่อหัวข้อย่อย" value="${escapeHtml(label)}" class="field-label flex-1 border border-pink-100 rounded-xl p-2 text-sm focus:border-pink-400 focus:outline-none placeholder-gray-400 font-medium text-pink-700 bg-gray-50/50 shadow-sm">
+                <div class="flex gap-1.5 bg-gray-50/80 p-1.5 rounded-full border border-pink-100 shadow-sm">
+                    ${colorDots}
                 </div>
-            `;
-            const allLangs = [
-                { label: "🇹🇭 ไทย", code: "th", text: item.th },
-                { label: "🇬🇧 อังกฤษ", code: "en", text: item.en },
-                { label: "🇨🇳 จีน", code: "zh", text: item.zh }
-            ];
-            const filteredLangs = allLangs.filter(l => l.code !== sourceLangDisplay);
-            let langHtml = '';
-            filteredLangs.forEach(lang => {
-                const txt = lang.text || "-";
-                langHtml += `
-                    <div class="flex justify-between items-start gap-2 mt-1">
-                        <span class="font-medium min-w-[60px]">${lang.label}:</span>
-                        <span class="flex-1 break-words">${escapeHtml(txt)}</span>
-                        <div class="flex gap-1 flex-shrink-0">
-                            <button class="history-speaker-btn" data-text="${escapeAttr(txt)}" data-lang="${lang.code}"><i class="fas fa-volume-up"></i></button>
-                        </div>
-                    </div>
-                `;
-            });
-            const pronounceHtml = item.customPronounce ? `
-                <div class="text-gray-500 text-xs mt-1 flex justify-between items-center">
-                    <span><i class="fas fa-pen-alt"></i> คำอ่าน: ${escapeHtml(item.customPronounce)}</span>
-                    <button class="history-speaker-btn" data-text="${escapeAttr(item.customPronounce)}" data-lang="th"><i class="fas fa-volume-up"></i></button>
-                </div>
-            ` : '';
-            const btnHtml = `
-                <div class="flex justify-end gap-2 mt-2">
-                    <button class="edit-entry text-blue-500 hover:text-blue-700 text-xs" data-id="${item.id}"><i class="fas fa-edit"></i> แก้ไข</button>
-                    <button class="delete-entry text-red-400 hover:text-red-600 text-xs" data-id="${item.id}"><i class="fas fa-trash-alt"></i> ลบ</button>
-                </div>
-            `;
-            card.innerHTML = sourceHtml + `<div class="mt-1">${langHtml}</div>` + pronounceHtml + btnHtml;
-            savedContainer.appendChild(card);
-        });
-        document.querySelectorAll('.history-speaker-btn').forEach(btn => {
-            btn.removeEventListener('click', e => speakText(btn.getAttribute('data-text'), btn.getAttribute('data-lang')));
-            btn.addEventListener('click', e => speakText(btn.getAttribute('data-text'), btn.getAttribute('data-lang')));
-        });
-        document.querySelectorAll('.delete-entry').forEach(btn => {
-            btn.removeEventListener('click', e => deleteVocabularyFromFirestore(btn.getAttribute('data-id')));
-            btn.addEventListener('click', e => deleteVocabularyFromFirestore(btn.getAttribute('data-id')));
-        });
-        document.querySelectorAll('.edit-entry').forEach(btn => {
-            btn.addEventListener('click', async e => {
-                const id = btn.getAttribute('data-id');
-                const item = allVocabularies.find(v => v.id === id);
-                if (!item) return;
-                if (!confirm("คุณต้องการแก้ไขคำศัพท์นี้ใช่หรือไม่?")) return;
-                const newSrc = prompt("แก้ไขข้อความต้นทาง:", item.sourceText);
-                if (newSrc === null) return;
-                const newTh = prompt("แก้ไขภาษาไทย:", item.th);
-                if (newTh === null) return;
-                const newEn = prompt("แก้ไขภาษาอังกฤษ:", item.en);
-                if (newEn === null) return;
-                const newZh = prompt("แก้ไขภาษาจีน:", item.zh);
-                if (newZh === null) return;
-                const newPron = prompt("แก้ไขคำอ่านภาษาไทย:", item.customPronounce || "");
-                if (newPron === null) return;
-                await updateVocabularyInFirestore(id, {
-                    sourceText: newSrc.trim(), th: newTh.trim(), en: newEn.trim(), zh: newZh.trim(),
-                    customPronounce: newPron.trim(), timestamp: firebase.firestore.FieldValue.serverTimestamp()
+            </div>
+            <div class="relative w-full">
+                <textarea id="${rowId}" rows="2" placeholder="รายละเอียด..." class="field-value w-full border border-pink-100 rounded-xl p-2 pr-10 text-sm bg-gray-50/50 resize-none focus:border-pink-400 focus:outline-none placeholder-gray-400 shadow-inner">${escapeHtml(value)}</textarea>
+                <button type="button" class="mic-btn absolute right-2 top-2 text-gray-400 hover:text-pink-500" data-target="${rowId}"><i class="fas fa-microphone"></i></button>
+            </div>
+            <button type="button" class="remove-field-btn absolute top-2 right-2 text-gray-300 hover:text-red-500 bg-white hover:bg-red-50 w-7 h-7 rounded-full flex items-center justify-center transition-all shadow-sm border border-transparent hover:border-red-100">
+                <i class="fas fa-trash text-xs"></i>
+            </button>
+        `;
+
+        const iconBtn = row.querySelector('.field-icon-btn');
+        iconBtn.addEventListener('click', () => openGlobalIconPicker(iconBtn));
+
+        const dots = row.querySelectorAll('.color-dot');
+        dots.forEach(dot => {
+            dot.addEventListener('click', () => {
+                dots.forEach(d => {
+                    const c = d.getAttribute('data-color');
+                    d.className = `color-dot w-5 h-5 rounded-full ${colorMap[c].bg} border-2 border-transparent transition-transform hover:scale-110 shadow-sm`;
                 });
+                const selectedColor = dot.getAttribute('data-color');
+                dot.className = `color-dot w-5 h-5 rounded-full ${colorMap[selectedColor].bg} border-2 ${colorMap[selectedColor].border} scale-110 transition-transform shadow-sm`;
+                row.setAttribute('data-selected-color', selectedColor);
             });
         });
+        
+        row.setAttribute('data-selected-color', color);
+        row.querySelector('.remove-field-btn').addEventListener('click', () => row.remove());
+        return row;
     }
 
-    async function saveCurrentVocabulary() {
-        if (!currentUser) { alert("กรุณาเข้าสู่ระบบก่อนบันทึก"); return; }
-        if (!currentTranslations.th && !currentTranslations.en && !currentTranslations.zh) { alert("ไม่มีข้อมูลคำแปลให้บันทึก"); return; }
-        if (!currentSourceText.trim()) return;
-        if (!confirm("คุณต้องการบันทึกคำศัพท์ชุดนี้ใช่หรือไม่?")) return;
-        await addVocabularyToFirestore({
-            sourceText: currentSourceText, sourceLang: currentSourceLang,
-            th: currentTranslations.th, en: currentTranslations.en, zh: currentTranslations.zh,
-            customPronounce: customPronounceInput.value.trim(),
-            timestamp: new Date().toISOString()
-        });
-        customPronounceInput.value = "";
-        const btn = saveVocabBtn;
-        const orig = btn.innerHTML;
-        btn.innerHTML = '<i class="fas fa-check"></i> บันทึกแล้ว!';
-        setTimeout(() => btn.innerHTML = orig, 1500);
-    }
+    addDynamicFieldBtn.addEventListener('click', () => {
+        dynamicFieldsContainer.appendChild(createFieldRow());
+        attachMicEvents();
+    });
 
-    // Reset function
-    function resetLanguageAndText() {
-        if (confirm("รีเซ็ตภาษาเป็นอัตโนมัติและล้างข้อความที่พิมพ์?")) {
-            sourceLangSelect.value = 'auto';
-            inputTextArea.value = '';
-            detectedLangInfo.classList.add('hidden');
-            // Optional: clear current translations display
-            thResultEl.innerText = '-';
-            enResultEl.innerText = '-';
-            zhResultEl.innerText = '-';
-            currentTranslations = { th: "", en: "", zh: "" };
-            currentSourceText = "";
-            currentSourceLang = "auto";
+    function resetDynamicFields() {
+        dynamicFieldsContainer.innerHTML = '';
+        const currentCat = categories.find(c => c.id === selectedCategoryId);
+        
+        if (currentCat && currentCat.fieldLabels && currentCat.fieldLabels.length > 0) {
+            currentCat.fieldLabels.forEach(item => {
+                if (typeof item === 'string') {
+                    dynamicFieldsContainer.appendChild(createFieldRow(item, "", "✨", "pink"));
+                } else {
+                    dynamicFieldsContainer.appendChild(createFieldRow(item.label, "", item.icon, item.color));
+                }
+            });
+        } else {
+            dynamicFieldsContainer.appendChild(createFieldRow("รายละเอียด", "", "✨", "pink"));
         }
+        attachMicEvents();
     }
-    resetLangBtn.addEventListener('click', resetLanguageAndText);
 
-    // Speech recognition
-    let recognition = null;
-    function initSpeechRecognition() {
-        if (!('webkitSpeechRecognition' in window)) {
-            voiceInputBtn.style.opacity = "0.5";
-            voiceInputBtn.title = "เบราว์เซอร์ไม่รองรับ";
+
+    // ----------------------------------------------------
+    // ส่วนที่ 11: การทำงานของ View Modes และการแสดงการ์ด
+    // ----------------------------------------------------
+    viewModeSelector.addEventListener('change', (e) => {
+        currentViewMode = e.target.value;
+        localStorage.setItem('notebook_view_mode', currentViewMode);
+        renderNotesList();
+    });
+
+    function renderNotesList() {
+        const filtered = noteEntries.filter(entry => {
+            const matchTitle = entry.title?.toLowerCase().includes(searchTerm.toLowerCase());
+            const matchFields = entry.fields && entry.fields.some(f => 
+                (f.label && f.label.toLowerCase().includes(searchTerm.toLowerCase())) || 
+                (f.value && f.value.toLowerCase().includes(searchTerm.toLowerCase()))
+            );
+            return matchTitle || matchFields;
+        });
+
+        if (filtered.length === 0) {
+            notesListContainer.className = 'max-h-[800px] overflow-y-auto pr-2 custom-scrollbar pb-6';
+            notesListContainer.innerHTML = `
+                <div class="text-center text-pink-300 py-12">
+                    <i class="fas fa-search-minus text-5xl mb-3"></i>
+                    <p>ไม่พบบันทึกที่คุณค้นหา 😥</p>
+                </div>`;
             return;
         }
-        const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
-        recognition = new SpeechRecognition();
-        recognition.interimResults = false;
-        voiceInputBtn.addEventListener('click', () => {
-            if (!recognition) return;
-            const sel = sourceLangSelect.value;
-            if (sel === 'th') recognition.lang = 'th-TH';
-            else if (sel === 'en') recognition.lang = 'en-US';
-            else if (sel === 'zh') recognition.lang = 'zh-CN';
-            else recognition.lang = 'th-TH';
-            recognition.start();
-            voiceInputBtn.innerHTML = '<i class="fas fa-microphone-slash text-red-500"></i>';
-        });
-        recognition.onresult = (e) => {
-            inputTextArea.value = e.results[0][0].transcript;
-            voiceInputBtn.innerHTML = '<i class="fas fa-microphone"></i>';
-        };
-        recognition.onerror = () => { voiceInputBtn.innerHTML = '<i class="fas fa-microphone"></i>'; alert("ไม่สามารถรับเสียงได้"); };
-        recognition.onend = () => { voiceInputBtn.innerHTML = '<i class="fas fa-microphone"></i>'; };
-    }
 
-    // Dark mode
-    function initDarkMode() {
-        if (localStorage.getItem('theme') === 'dark' || (!localStorage.getItem('theme') && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
-            document.documentElement.classList.add('dark');
+        notesListContainer.innerHTML = '';
+        
+        let gridClass = '';
+        if (currentViewMode === 'content') {
+            gridClass = 'space-y-4';
+        } else if (currentViewMode === 'list') {
+            gridClass = 'flex flex-col gap-2';
+        } else if (currentViewMode === 'details') {
+            gridClass = 'flex flex-col border border-pink-100 rounded-xl overflow-hidden bg-white shadow-sm';
+        } else if (currentViewMode === 'tiles') {
+            gridClass = 'grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4';
+        } else if (currentViewMode === 'xlarge') {
+            gridClass = 'grid grid-cols-1 sm:grid-cols-2 gap-6';
+        } else if (currentViewMode === 'large') {
+            gridClass = 'grid grid-cols-2 sm:grid-cols-3 gap-5';
+        } else if (currentViewMode === 'medium') {
+            gridClass = 'grid grid-cols-3 sm:grid-cols-4 lg:grid-cols-5 gap-4';
+        } else if (currentViewMode === 'small') {
+            gridClass = 'grid grid-cols-4 sm:grid-cols-5 lg:grid-cols-6 gap-3';
         }
-        darkModeToggle.addEventListener('click', () => {
-            document.documentElement.classList.toggle('dark');
-            localStorage.setItem('theme', document.documentElement.classList.contains('dark') ? 'dark' : 'light');
+        
+        notesListContainer.className = `${gridClass} max-h-[800px] overflow-y-auto pr-2 custom-scrollbar pb-6`;
+
+        filtered.forEach(entry => {
+            const card = document.createElement('div');
+            card.setAttribute('data-id', entry.id);
+            card.className = getCardClass(currentViewMode);
+            card.innerHTML = generateCardHTML(entry, currentViewMode);
+            notesListContainer.appendChild(card);
         });
     }
 
-    // Auth modal
-    function openAuthModal(login = true) {
-        isLoginMode = login;
-        authModalTitle.textContent = login ? "เข้าสู่ระบบ" : "สมัครสมาชิก";
-        submitAuthBtn.textContent = login ? "เข้าสู่ระบบ" : "สมัครสมาชิก";
-        toggleAuthMode.textContent = login ? "ยังไม่มีบัญชี? สมัครสมาชิก" : "มีบัญชีอยู่แล้ว? เข้าสู่ระบบ";
-        authEmail.value = "";
-        authPassword.value = "";
-        authError.classList.add('hidden');
-        authModal.classList.remove('hidden');
-    }
-    function closeModal() { authModal.classList.add('hidden'); }
-    async function handleAuthSubmit(e) {
-        e.preventDefault();
-        const email = authEmail.value.trim();
-        const password = authPassword.value;
-        authError.classList.add('hidden');
-        try {
-            if (isLoginMode) await auth.signInWithEmailAndPassword(email, password);
-            else await auth.createUserWithEmailAndPassword(email, password);
-            closeModal();
-        } catch (err) {
-            authError.textContent = err.message;
-            authError.classList.remove('hidden');
+    function getCardClass(mode) {
+        const base = "relative group cursor-pointer transition-all bg-white hover:bg-pink-50/50 ";
+        if (mode === 'content') {
+            return base + "p-5 rounded-2xl border border-pink-100 shadow-sm hover:shadow-md note-card-item flex flex-col sm:flex-row gap-5";
         }
+        if (mode === 'list') {
+            return base + "p-3 rounded-xl border border-pink-50 shadow-sm flex items-center gap-3 note-card-item";
+        }
+        if (mode === 'details') {
+            return base + "p-3 border-b border-pink-50 flex items-center justify-between note-card-item rounded-none shadow-none";
+        }
+        if (mode === 'tiles') {
+            return base + "p-4 rounded-xl border border-pink-100 shadow-sm flex items-center gap-4 note-card-item h-28";
+        }
+        return base + "p-3 sm:p-4 rounded-xl border border-pink-100 shadow-sm flex flex-col items-center text-center note-card-item h-full";
     }
-    async function handleGoogleSignIn() {
-        try {
-            await auth.signInWithPopup(googleProvider);
-            closeModal();
-        } catch(e) { alert("Google sign-in failed: " + e.message); }
+
+    function generateCardHTML(entry, mode) {
+        const title = escapeHtml(entry.title || 'ไม่มีหัวข้อ');
+        const icon = entry.fields?.[0]?.icon || '✨';
+        const imgDisplay = entry.image 
+            ? `<img src="${entry.image}" class="w-full h-full object-cover">`
+            : `<div class="w-full h-full bg-pink-50 flex items-center justify-center text-opacity-50"><span class="scale-150">${icon}</span></div>`;
+        
+        const btnHTML = `
+            <div class="flex gap-1 opacity-100 sm:opacity-0 group-hover:opacity-100 transition-opacity ${mode === 'details' || mode === 'list' ? '' : 'absolute right-2 top-2 bg-white/90 p-1 rounded-lg backdrop-blur-sm shadow-sm border border-pink-50'}">
+                <button class="edit-note w-8 h-8 rounded-md text-blue-400 hover:bg-blue-50 hover:text-blue-600 flex items-center justify-center transition" data-id="${entry.id}">
+                    <i class="fas fa-pen text-sm pointer-events-none"></i>
+                </button>
+                <button class="delete-note w-8 h-8 rounded-md text-red-400 hover:bg-red-50 hover:text-red-600 flex items-center justify-center transition" data-id="${entry.id}">
+                    <i class="fas fa-trash-alt text-sm pointer-events-none"></i>
+                </button>
+            </div>
+        `;
+
+        if (mode === 'content') {
+            let fieldsHtml = '';
+            if (entry.fields && entry.fields.length > 0) {
+                fieldsHtml = `<div class="mt-4 space-y-3 border-t border-pink-100 pt-4">`;
+                entry.fields.forEach(f => {
+                    if (f.label || f.value) {
+                        const colorCode = f.color || 'pink';
+                        const colorStyle = colorMap[colorCode] || colorMap['pink'];
+                        const iconHtml = f.icon ? `<span class="mr-1.5 text-lg">${escapeHtml(f.icon)}</span>` : '';
+
+                        fieldsHtml += `
+                            <div class="text-sm">
+                                ${f.label ? `<span class="font-medium ${colorStyle.badgeBg} ${colorStyle.badgeText} px-2.5 py-1 rounded-lg inline-flex items-center mb-1.5 shadow-sm">${iconHtml}${escapeHtml(f.label)}</span>` : ''}
+                                <div class="text-gray-700 pl-1 whitespace-pre-wrap leading-relaxed">${escapeHtml(f.value)}</div>
+                            </div>`;
+                    }
+                });
+                fieldsHtml += `</div>`;
+            }
+            let imageHtml = '';
+            if (entry.image) {
+                imageHtml = `<div class="w-full sm:w-40 h-40 flex-shrink-0 mt-3 sm:mt-0 rounded-xl overflow-hidden border border-pink-100 shadow-sm">${imgDisplay}</div>`;
+            }
+
+            return `
+                <div class="flex-1 pr-4 min-w-0">
+                    <div class="font-bold text-xl text-gray-800 flex items-center gap-2 truncate">✨ ${title}</div>
+                    ${fieldsHtml}
+                </div>
+                ${imageHtml}
+                ${btnHTML}
+            `;
+        }
+        
+        if (mode === 'list') {
+            return `
+                <div class="w-10 h-10 rounded-lg overflow-hidden flex-shrink-0 border border-pink-100">${imgDisplay}</div>
+                <div class="flex-1 font-bold text-gray-800 truncate text-base">${title}</div>
+                ${btnHTML}
+            `;
+        }
+
+        if (mode === 'details') {
+            const date = entry.createdAt?.toDate ? entry.createdAt.toDate().toLocaleDateString('th-TH') : '-';
+            const fCount = entry.fields ? entry.fields.length : 0;
+            return `
+                <div class="flex items-center gap-3 flex-1 min-w-0">
+                    <div class="w-8 h-8 rounded overflow-hidden flex-shrink-0 border border-pink-50">${imgDisplay}</div>
+                    <div class="font-semibold text-gray-800 truncate flex-1">${title}</div>
+                    <div class="text-xs text-gray-400 hidden md:block w-24 text-right pr-4">${fCount} หัวข้อย่อย</div>
+                    <div class="text-xs text-gray-400 hidden sm:block w-24">${date}</div>
+                </div>
+                ${btnHTML}
+            `;
+        }
+
+        if (mode === 'tiles') {
+            const subtext = entry.fields?.[0]?.value || (entry.fields?.length + " รายการ");
+            return `
+                <div class="w-16 h-16 rounded-xl overflow-hidden flex-shrink-0 border border-pink-100 shadow-inner">${imgDisplay}</div>
+                <div class="flex-1 min-w-0 flex flex-col justify-center">
+                    <div class="font-bold text-gray-800 truncate text-base mb-1">${title}</div>
+                    <div class="text-xs text-gray-500 truncate">${escapeHtml(subtext)}</div>
+                </div>
+                ${btnHTML}
+            `;
+        }
+
+        let sizeClass = "w-12 h-12 text-3xl"; 
+        if(mode === 'xlarge') sizeClass = "w-32 h-32 sm:w-48 sm:h-48 text-6xl";
+        if(mode === 'large') sizeClass = "w-24 h-24 sm:w-32 sm:h-32 text-5xl";
+        if(mode === 'medium') sizeClass = "w-16 h-16 sm:w-24 sm:h-24 text-4xl";
+        
+        return `
+            <div class="${sizeClass} rounded-2xl overflow-hidden mb-3 border border-pink-100 shadow-sm flex items-center justify-center bg-pink-50">
+                ${imgDisplay}
+            </div>
+            <div class="font-semibold text-gray-800 truncate w-full text-sm sm:text-base">${title}</div>
+            ${btnHTML}
+        `;
     }
-    let isLoginMode = true;
 
-    function escapeHtml(s) { if (!s) return ''; return s.replace(/[&<>]/g, m => ({'&':'&amp;','<':'&lt;','>':'&gt;'}[m])); }
-    function escapeAttr(s) { if (!s) return ''; return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
+    // Event Delegation ควบคุมการคลิกบนรายการบันทึก
+    notesListContainer.addEventListener('click', (e) => {
+        const editBtn = e.target.closest('.edit-note');
+        const delBtn = e.target.closest('.delete-note');
+        const card = e.target.closest('.note-card-item');
 
-    // Search clear button
-    function updateClearSearchButton() {
-        if (searchInput.value.trim().length > 0) {
-            clearSearchBtn.classList.remove('hidden');
+        if (editBtn) {
+            e.stopPropagation();
+            const entry = noteEntries.find(entry => entry.id === editBtn.dataset.id);
+            if (entry) fillFormForEdit(entry);
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        } else if (delBtn) {
+            e.stopPropagation();
+            if (confirm("⚠️ แน่ใจไหมว่าจะลบข้อความนี้ทิ้ง? 🥺")) {
+                db.collection('users').doc(currentUser.uid).collection('diaryEntries').doc(delBtn.dataset.id).delete().then(() => {
+                    loadNotes();
+                });
+            }
+        } else if (card) {
+            openPreviewModal(card.dataset.id);
+        }
+    });
+
+    function openPreviewModal(id) {
+        const entry = noteEntries.find(e => e.id === id);
+        if (!entry) return;
+
+        document.getElementById('previewModalTitle').innerText = entry.title || 'ไม่มีหัวข้อ';
+        
+        const imgCont = document.getElementById('previewModalImageContainer');
+        const img = document.getElementById('previewModalImage');
+        if (entry.image) {
+            img.src = entry.image;
+            imgCont.classList.remove('hidden');
         } else {
-            clearSearchBtn.classList.add('hidden');
+            imgCont.classList.add('hidden');
+            img.src = "";
+        }
+
+        const fieldsCont = document.getElementById('previewModalFields');
+        fieldsCont.innerHTML = '';
+        
+        if (entry.fields && entry.fields.length > 0) {
+            entry.fields.forEach(f => {
+                if(f.label || f.value) {
+                    const colorCode = f.color || 'pink';
+                    const c = colorMap[colorCode] || colorMap['pink'];
+                    fieldsCont.innerHTML += `
+                        <div class="bg-gray-50/50 p-4 rounded-xl border border-gray-100">
+                            ${f.label ? `<div class="font-medium ${c.badgeBg} ${c.badgeText} px-3 py-1 rounded-lg inline-flex items-center mb-2"><span class="mr-2 text-lg">${escapeHtml(f.icon||'')}</span>${escapeHtml(f.label)}</div>` : ''}
+                            <div class="text-gray-700 whitespace-pre-wrap leading-relaxed pl-1">${escapeHtml(f.value)}</div>
+                        </div>
+                    `;
+                }
+            });
+        } else {
+            fieldsCont.innerHTML = `<div class="text-gray-400 italic text-center py-4">ไม่มีรายละเอียดเพิ่มเติม</div>`;
+        }
+
+        previewEditBtn.onclick = () => {
+            closePreviewModal();
+            fillFormForEdit(entry);
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        };
+
+        previewModal.classList.remove('hidden');
+    }
+
+    function closePreviewModal() {
+        previewModal.classList.add('hidden');
+    }
+
+
+    // ----------------------------------------------------
+    // ส่วนที่ 12: การจัดการฟอร์มแก้ไขและบันทึก
+    // ----------------------------------------------------
+    function fillFormForEdit(entry) {
+        editIdInput.value = entry.id;
+        mainTitleField.value = entry.title || '';
+        
+        if (entry.image) {
+            currentImageBase64 = entry.image;
+            imagePreview.src = currentImageBase64;
+            imagePreviewContainer.classList.remove('hidden');
+            triggerImageBtn.classList.add('hidden');
+        } else {
+            currentImageBase64 = "";
+            imageInput.value = "";
+            imagePreviewContainer.classList.add('hidden');
+            triggerImageBtn.classList.remove('hidden');
+        }
+
+        dynamicFieldsContainer.innerHTML = ''; 
+        if (entry.fields && entry.fields.length > 0) {
+            entry.fields.forEach(f => dynamicFieldsContainer.appendChild(createFieldRow(f.label, f.value, f.icon || "✨", f.color || "pink")));
+        } else {
+            resetDynamicFields();
+        }
+        
+        cancelEditBtn.classList.remove('hidden');
+        submitBtnText.innerText = "อัปเดต";
+        attachMicEvents();
+    }
+
+    function clearForm() {
+        editIdInput.value = '';
+        mainTitleField.value = '';
+        currentImageBase64 = "";
+        imageInput.value = "";
+        imagePreviewContainer.classList.add('hidden');
+        triggerImageBtn.classList.remove('hidden');
+
+        resetDynamicFields();
+        cancelEditBtn.classList.add('hidden');
+        submitBtnText.innerText = "บันทึก";
+    }
+
+    async function saveNoteEntry(e) {
+        e.preventDefault();
+        if (!currentUser) { alert("กรุณาเข้าสู่ระบบก่อนจดบันทึกน้า 💖"); return; }
+        if (!selectedCategoryId) { alert("เลือกสมุดก่อนนะคะ 📚"); return; }
+        
+        const title = mainTitleField.value.trim();
+        if (!title) { alert("อย่าลืมตั้งหัวข้อหลักด้วยนะคะ ✨"); return; }
+
+        const fields = [];
+        const currentLabels = [];
+        const rows = document.querySelectorAll('.dynamic-field-row');
+        rows.forEach(row => {
+            const label = row.querySelector('.field-label').value.trim();
+            const value = row.querySelector('.field-value').value.trim();
+            const iconBtn = row.querySelector('.field-icon-btn');
+            const icon = iconBtn ? iconBtn.getAttribute('data-icon') : "✨";
+            const color = row.getAttribute('data-selected-color') || "pink";
+
+            if (label || value) { 
+                fields.push({ label, value, icon, color });
+                if (label && !currentLabels.some(l => l.label === label)) {
+                    currentLabels.push({ label, icon, color });
+                }
+            }
+        });
+
+        const data = {
+            title,
+            fields,
+            image: currentImageBase64,
+            categoryId: selectedCategoryId,
+            updatedAt: firebase.firestore.FieldValue.serverTimestamp()
+        };
+        
+        const id = editIdInput.value;
+        try {
+            const submitBtn = noteForm.querySelector('button[type="submit"]');
+            const originalText = submitBtn.innerHTML;
+            submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> รอแป๊บ...';
+            submitBtn.disabled = true;
+
+            if (id) {
+                await db.collection('users').doc(currentUser.uid).collection('diaryEntries').doc(id).update(data);
+            } else {
+                data.createdAt = firebase.firestore.FieldValue.serverTimestamp();
+                await db.collection('users').doc(currentUser.uid).collection('diaryEntries').add(data);
+            }
+            
+            if (currentLabels.length > 0) {
+                await db.collection('users').doc(currentUser.uid).collection('diaryCategories').doc(selectedCategoryId).update({
+                    fieldLabels: currentLabels
+                });
+                const catIndex = categories.findIndex(c => c.id === selectedCategoryId);
+                if (catIndex > -1) categories[catIndex].fieldLabels = currentLabels;
+            }
+            
+            clearForm();
+            loadNotes();
+            
+            submitBtn.innerHTML = originalText;
+            submitBtn.disabled = false;
+        } catch(err) {
+            console.error(err);
+            alert("บันทึกไม่สำเร็จ อาจเป็นเพราะรูปภาพใหญ่เกินไป ลองเลือกรูปใหม่ดูนะคะ 🥺");
         }
     }
-    searchInput.addEventListener('input', (e) => {
-        searchQuery = e.target.value;
-        updateClearSearchButton();
-        renderSavedList();
-    });
-    clearSearchBtn.addEventListener('click', () => {
-        searchInput.value = '';
-        searchQuery = '';
-        updateClearSearchButton();
-        renderSavedList();
-    });
 
-    // Init
-    loadCache();
-    initDarkMode();
-    initSpeechRecognition();
-    attachEvents();
-    auth.onAuthStateChanged(updateAuthUI);
-    loginBtn.addEventListener('click', () => openAuthModal(true));
-    registerBtn.addEventListener('click', () => openAuthModal(false));
+
+    // ----------------------------------------------------
+    // ส่วนที่ 13: การจัดการสมุดหมวดหมู่
+    // ----------------------------------------------------
+    function openCategoryModal() {
+        if (!currentUser) { 
+            alert("กรุณาเข้าสู่ระบบก่อนสร้างสมุดนะคะ 💖"); 
+            return; 
+        }
+        newCategoryNameInput.value = '';
+        selectedIcon = "🌸"; 
+        if(categoryIconPreview) categoryIconPreview.innerText = "🌸";
+        categoryModal.classList.remove('hidden');
+    }
+
+    function closeCategoryModal() { 
+        categoryModal.classList.add('hidden'); 
+    }
+
+    async function addCategory() {
+        if (!currentUser) { alert("กรุณาเข้าสู่ระบบก่อนสร้างสมุดนะคะ 💖"); return; }
+        const name = newCategoryNameInput.value.trim();
+        if (!name) { alert("ตั้งชื่อสมุดสักหน่อยนะคะ 🥺"); return; }
+        
+        let defaultFields = [{label: "รายละเอียด", icon: "✨", color: "pink"}];
+        if (name.includes('ภาษา') || name.includes('แปล') || name.includes('ศัพท์')) { 
+            defaultFields = [
+                {label: "คำศัพท์", icon: "💬", color: "blue"}, 
+                {label: "คำอ่าน", icon: "🗣️", color: "emerald"}, 
+                {label: "ความหมาย", icon: "📖", color: "pink"}
+            ]; 
+        }
+        
+        const newCat = { name, icon: selectedIcon, fieldLabels: defaultFields, createdAt: firebase.firestore.FieldValue.serverTimestamp() };
+        const ref = await db.collection('users').doc(currentUser.uid).collection('diaryCategories').add(newCat);
+        
+        categories.push({ id: ref.id, name, icon: selectedIcon, fieldLabels: defaultFields });
+        
+        // เมื่อสร้างหมวดหมู่ใหม่ ให้ตั้งเป็นหมวดหมู่ที่ถูกเลือกและบันทึกลง LocalStorage ด้วย
+        selectedCategoryId = ref.id; 
+        localStorage.setItem('last_selected_notebook', ref.id);
+        
+        renderCategoryTabs(); 
+        loadNotes(); 
+        clearForm(); 
+        closeCategoryModal();
+    }
+
+    async function loadCategories() {
+        if (!currentUser) return;
+        const snap = await db.collection('users').doc(currentUser.uid).collection('diaryCategories').orderBy('createdAt').get();
+        categories = snap.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+        
+        if (categories.length === 0) {
+            const batch = db.batch();
+            const catRef1 = db.collection('users').doc(currentUser.uid).collection('diaryCategories').doc();
+            batch.set(catRef1, { name: "สมุดโน้ตทั่วไป", icon: "🌸", fieldLabels: [{label: "รายละเอียด", icon: "✨", color: "pink"}], createdAt: firebase.firestore.FieldValue.serverTimestamp() });
+            
+            const catRef2 = db.collection('users').doc(currentUser.uid).collection('diaryCategories').doc();
+            batch.set(catRef2, { name: "สมุดจดภาษา", icon: "🌐", fieldLabels: [{label: "คำศัพท์", icon: "💬", color: "blue"}, {label: "คำอ่าน", icon: "🗣️", color: "emerald"}, {label: "ความหมาย", icon: "📖", color: "pink"}], createdAt: firebase.firestore.FieldValue.serverTimestamp() });
+            
+            await batch.commit();
+            categories = [
+                { id: catRef1.id, name: "สมุดโน้ตทั่วไป", icon: "🌸", fieldLabels: [{label: "รายละเอียด", icon: "✨", color: "pink"}] },
+                { id: catRef2.id, name: "สมุดจดภาษา", icon: "🌐", fieldLabels: [{label: "คำศัพท์", icon: "💬", color: "blue"}, {label: "คำอ่าน", icon: "🗣️", color: "emerald"}, {label: "ความหมาย", icon: "📖", color: "pink"}] }
+            ];
+        }
+        
+        // คืนค่าสมุดที่เปิดล่าสุดจาก LocalStorage (ถ้ามีและยังอยู่ใน categories)
+        const savedCategoryId = localStorage.getItem('last_selected_notebook');
+        if (savedCategoryId && categories.some(c => c.id === savedCategoryId)) {
+            selectedCategoryId = savedCategoryId;
+        } else if (!selectedCategoryId && categories.length > 0) {
+            selectedCategoryId = categories[0].id;
+        }
+        
+        renderCategoryTabs();
+        if (selectedCategoryId) { loadNotes(); resetDynamicFields(); }
+    }
+
+    function renderCategoryTabs() {
+        categoryTabsContainer.innerHTML = '';
+        categories.forEach(cat => {
+            const btn = document.createElement('button');
+            const isSelected = selectedCategoryId === cat.id;
+            btn.className = `flex items-center gap-2 px-4 py-2 rounded-2xl text-sm font-medium transition-all duration-200 border-2 shadow-sm flex-shrink-0 ${
+                isSelected ? 'bg-pink-100 border-pink-300 text-pink-700 transform scale-105' : 'bg-white border-transparent text-gray-600 hover:bg-pink-50'
+            }`;
+            btn.innerHTML = `<span class="text-xl">${cat.icon || '🌸'}</span> <span class="whitespace-nowrap">${cat.name}</span>`;
+            btn.onclick = () => {
+                selectedCategoryId = cat.id;
+                
+                // บันทึกการเลือกหมวดหมู่ลง LocalStorage
+                localStorage.setItem('last_selected_notebook', cat.id);
+                
+                renderCategoryTabs();
+                loadNotes();
+                clearForm();
+            };
+            categoryTabsContainer.appendChild(btn);
+        });
+    }
+
+    async function editCategoryName() {
+        if (!selectedCategoryId) return;
+        const cat = categories.find(c => c.id === selectedCategoryId);
+        const newName = prompt("แก้ไขชื่อสมุด:", cat.name);
+        if (newName && newName.trim() !== "" && newName.trim() !== cat.name) {
+            await db.collection('users').doc(currentUser.uid).collection('diaryCategories').doc(selectedCategoryId).update({ name: newName.trim() });
+            cat.name = newName.trim();
+            renderCategoryTabs(); loadNotes(); 
+        }
+    }
+
+    async function deleteCategory() {
+        if (!selectedCategoryId) return;
+        if (!confirm("⚠️ แน่ใจไหมว่าจะลบสมุดเล่มนี้?\nบันทึกทุกหน้าในสมุดเล่มนี้จะหายไปทั้งหมดเลยนะ 🥺")) return;
+        
+        const notesSnap = await db.collection('users').doc(currentUser.uid).collection('diaryEntries').where('categoryId', '==', selectedCategoryId).get();
+        const batch = db.batch();
+        notesSnap.forEach(doc => { batch.delete(doc.ref); });
+        
+        batch.delete(db.collection('users').doc(currentUser.uid).collection('diaryCategories').doc(selectedCategoryId));
+        await batch.commit();
+        
+        selectedCategoryId = null; 
+        
+        // ลบค่าใน LocalStorage เมื่อสมุดถูกลบ
+        localStorage.removeItem('last_selected_notebook');
+        
+        categoryActionsDiv.classList.add('hidden'); 
+        translationToolContainer.classList.add('hidden');
+        loadCategories();
+    }
+
+    async function loadNotes() {
+        if (!currentUser || !selectedCategoryId) return;
+        const snap = await db.collection('users').doc(currentUser.uid).collection('diaryEntries')
+            .where('categoryId', '==', selectedCategoryId).get();
+            
+        noteEntries = snap.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+        noteEntries.sort((a, b) => {
+            const timeA = a.createdAt?.toDate ? a.createdAt.toDate().getTime() : 0;
+            const timeB = b.createdAt?.toDate ? b.createdAt.toDate().getTime() : 0;
+            return timeB - timeA;
+        });
+        
+        renderNotesList();
+        
+        const cat = categories.find(c => c.id === selectedCategoryId);
+        if (cat) {
+            selectedCategoryNameSpan.innerHTML = `${cat.icon} ${cat.name}`;
+            categoryActionsDiv.classList.remove('hidden');
+            
+            const isLang = cat.name.includes('ภาษา') || cat.name.includes('แปล') || cat.name.includes('ศัพท์');
+            if (isLang) { translationToolContainer.classList.remove('hidden'); } 
+            else { translationToolContainer.classList.add('hidden'); }
+        }
+    }
+
+
+    // ----------------------------------------------------
+    // ส่วนที่ 14: Authentication และการโหลดเริ่มต้น
+    // ----------------------------------------------------
+    function updateUI(user) {
+        if (user) {
+            currentUser = user; 
+            authButtonsDiv.classList.add('hidden');
+            userInfoDiv.classList.remove('hidden'); 
+            userInfoDiv.classList.add('flex');
+            userEmailSpan.innerText = user.email;
+            if (user.photoURL) { 
+                userAvatar.src = user.photoURL; 
+                userAvatar.classList.remove('hidden'); 
+            } else {
+                userAvatar.classList.add('hidden');
+            }
+            loadAppTitle(); 
+            loadCategories();
+        } else {
+            currentUser = null; 
+            authButtonsDiv.classList.remove('hidden');
+            userInfoDiv.classList.add('hidden'); 
+            userInfoDiv.classList.remove('flex');
+            categories = []; noteEntries = []; selectedCategoryId = null; currentImageBase64 = "";
+            
+            // ลบการจำสมุดล่าสุดเมื่อล็อกเอาต์
+            localStorage.removeItem('last_selected_notebook');
+            
+            appTitle.innerText = "My Notebook 🌸";
+            categoryTabsContainer.innerHTML = ''; 
+            categoryActionsDiv.classList.add('hidden'); 
+            translationToolContainer.classList.add('hidden');
+            notesListContainer.innerHTML = `
+                <div class="text-center text-pink-300 py-20 flex flex-col items-center">
+                    <i class="fas fa-lock text-6xl mb-4"></i>
+                    <p class="text-lg">กรุณาเข้าสู่ระบบเพื่อเปิดสมุดบันทึก 💖</p>
+                </div>
+            `;
+            clearForm();
+        }
+    }
+
+    async function googleSignIn() {
+        try { 
+            await auth.signInWithPopup(new firebase.auth.GoogleAuthProvider()); 
+        } catch(e) { 
+            console.error(e); 
+            alert("เข้าสู่ระบบด้วย Google ไม่สำเร็จค่ะ 😥"); 
+        }
+    }
+
+    searchInput.addEventListener('input', (e) => { 
+        searchTerm = e.target.value; 
+        renderNotesList(); 
+    });
+    
+    noteForm.addEventListener('submit', saveNoteEntry);
+    clearFormBtn.addEventListener('click', clearForm);
+    cancelEditBtn.addEventListener('click', clearForm);
+    
+    addCategoryBtn.addEventListener('click', openCategoryModal);
+    confirmCategoryBtn.addEventListener('click', addCategory);
+    closeCategoryX.addEventListener('click', closeCategoryModal);
+    categoryModal.addEventListener('click', (e) => { 
+        if (e.target === categoryModal) closeCategoryModal(); 
+    });
+    
+    loginBtn.addEventListener('click', googleSignIn);
     logoutBtn.addEventListener('click', () => auth.signOut());
-    googleSignInBtn.addEventListener('click', handleGoogleSignIn);
-    closeAuthModal.addEventListener('click', closeModal);
-    cancelAuthBtn.addEventListener('click', closeModal);
-    authForm.addEventListener('submit', handleAuthSubmit);
-    toggleAuthMode.addEventListener('click', () => openAuthModal(!isLoginMode));
-    clearInputBtn.addEventListener('click', () => { inputTextArea.value = ''; detectedLangInfo.classList.add('hidden'); });
-    translateBtn.addEventListener('click', handleTranslation);
-    saveVocabBtn.addEventListener('click', saveCurrentVocabulary);
-    clearHistoryBtn.addEventListener('click', clearAllVocabularies);
-    const observer = new MutationObserver(() => attachEvents());
-    observer.observe(document.getElementById('main-content'), { childList: true, subtree: true });
-    updateClearSearchButton();
+    
+    auth.onAuthStateChanged(updateUI);
+    attachMicEvents();
+
 </script>
 </body>
 </html>
