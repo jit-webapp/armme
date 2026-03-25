@@ -1,4 +1,4 @@
-const CACHE_NAME = 'armmynote-cache-v2.6';
+const CACHE_NAME = 'armmynote-cache-v2.7';
 const urlsToCache = ['./', './index.html', './manifest.json', './icon.svg'];
 
 self.addEventListener('install', event => {

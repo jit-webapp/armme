@@ -10,6 +10,26 @@
     <link rel="apple-touch-icon" href="icon.svg">
 
     <script src="https://cdn.tailwindcss.com"></script>
+    
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        pink: {
+                            50: 'var(--c-base-50)', 100: 'var(--c-base-100)', 200: 'var(--c-base-200)',
+                            300: 'var(--c-base-300)', 400: 'var(--c-base-400)', 500: 'var(--c-base-500)',
+                            600: 'var(--c-base-600)', 700: 'var(--c-base-700)', 900: 'var(--c-base-900)'
+                        },
+                        rose: {
+                            300: 'var(--c-acc-300)', 400: 'var(--c-acc-400)', 500: 'var(--c-acc-500)'
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Kanit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     
@@ -18,29 +38,75 @@
     <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
     
     <style>
+        /* ❌ ลบ body { ที่เคยครอบอยู่ออกแล้ว ให้ :root อยู่นอกสุด */
+        :root, [data-theme="sakura"] {
+            --c-base-50: #fdf2f8; --c-base-100: #fce7f3; --c-base-200: #fbcfe8;
+            --c-base-300: #f9a8d4; --c-base-400: #f472b6; --c-base-500: #ec4899;
+            --c-base-600: #db2777; --c-base-700: #be185d; --c-base-900: #831843;
+            --c-acc-300: #fda4af; --c-acc-400: #fb7185; --c-acc-500: #f43f5e;
+        }
+        [data-theme="matcha"] {
+            --c-base-50: #f0fdf4; --c-base-100: #dcfce7; --c-base-200: #bbf7d0;
+            --c-base-300: #86efac; --c-base-400: #4ade80; --c-base-500: #22c55e;
+            --c-base-600: #16a34a; --c-base-700: #15803d; --c-base-900: #14532d;
+            --c-acc-300: #6ee7b7; --c-acc-400: #34d399; --c-acc-500: #10b981;
+        }
+        [data-theme="blueberry"] {
+            --c-base-50: #eff6ff; --c-base-100: #dbeafe; --c-base-200: #bfdbfe;
+            --c-base-300: #93c5fd; --c-base-400: #60a5fa; --c-base-500: #3b82f6;
+            --c-base-600: #2563eb; --c-base-700: #1d4ed8; --c-base-900: #1e3a8a;
+            --c-acc-300: #a5b4fc; --c-acc-400: #818cf8; --c-acc-500: #6366f1;
+        }
+        [data-theme="lavender"] {
+            --c-base-50: #faf5ff; --c-base-100: #f3e8ff; --c-base-200: #e9d5ff;
+            --c-base-300: #d8b4fe; --c-base-400: #c084fc; --c-base-500: #a855f7;
+            --c-base-600: #9333ea; --c-base-700: #7e22ce; --c-base-900: #581c87;
+            --c-acc-300: #f0abfc; --c-acc-400: #e879f9; --c-acc-500: #d946ef;
+        }
+        [data-theme="peach"] {
+            --c-base-50: #fff7ed; --c-base-100: #ffedd5; --c-base-200: #fed7aa;
+            --c-base-300: #fdba74; --c-base-400: #fb923c; --c-base-500: #f97316;
+            --c-base-600: #ea580c; --c-base-700: #c2410c; --c-base-900: #7c2d12;
+            --c-acc-300: #fca5a5; --c-acc-400: #f87171; --c-acc-500: #ef4444;
+        }
+        [data-theme="lemon"] {
+            --c-base-50: #fefce8; --c-base-100: #fef9c3; --c-base-200: #fef08a;
+            --c-base-300: #fde047; --c-base-400: #facc15; --c-base-500: #eab308;
+            --c-base-600: #ca8a04; --c-base-700: #a16207; --c-base-900: #713f12;
+            --c-acc-300: #fcd34d; --c-acc-400: #fbbf24; --c-acc-500: #f59e0b;
+        }
+        [data-theme="mint"] {
+            --c-base-50: #f0fdfa; --c-base-100: #ccfbf1; --c-base-200: #99f6e4;
+            --c-base-300: #5eead4; --c-base-400: #2dd4bf; --c-base-500: #14b8a6;
+            --c-base-600: #0d9488; --c-base-700: #0f766e; --c-base-900: #134e4a;
+            --c-acc-300: #67e8f9; --c-acc-400: #22d3ee; --c-acc-500: #06b6d4;
+        }
+
+        /* เริ่มการตกแต่งของเดิม */
         body { 
-            background-color: #fce7f3; 
-            background-image: radial-gradient(#f9a8d4 1px, transparent 1px);
+            background-color: var(--c-base-50); 
+            background-image: radial-gradient(var(--c-base-300) 1px, transparent 1px);
             background-size: 20px 20px;
             font-family: 'Kanit', sans-serif; 
         }
         
         .paper-card {
-            background: #fff0f5;
-            border: 2px dashed #fbcfe8;
+            background: #ffffff90;
+            backdrop-filter: blur(8px);
+            border: 2px dashed var(--c-base-200);
             border-radius: 24px;
-            box-shadow: 0 8px 20px rgba(244, 114, 182, 0.2);
+            box-shadow: 0 8px 20px color-mix(in srgb, var(--c-base-400) 20%, transparent);
         }
 
         .entry-card {
             transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-            border-left: 6px solid #f472b6; 
+            border-left: 6px solid var(--c-base-400); 
             border-radius: 16px;
             background: rgba(255, 255, 255, 0.85);
         }
         .entry-card:hover { 
             transform: translateY(-3px) scale(1.01); 
-            box-shadow: 0 10px 15px -3px rgba(244, 114, 182, 0.2);
+            box-shadow: 0 10px 15px -3px color-mix(in srgb, var(--c-base-400) 20%, transparent);
             background: rgba(255, 255, 255, 1);
         }
 
@@ -53,14 +119,14 @@
 
         .category-tabs, .custom-scrollbar {
             scrollbar-width: thin;
-            scrollbar-color: #fbcfe8 transparent;
+            scrollbar-color: var(--c-base-200) transparent;
         }
         .category-tabs::-webkit-scrollbar, .custom-scrollbar::-webkit-scrollbar { 
             height: 6px; 
             width: 6px; 
         }
         .category-tabs::-webkit-scrollbar-thumb, .custom-scrollbar::-webkit-scrollbar-thumb { 
-            background-color: #fbcfe8; 
+            background-color: var(--c-base-200); 
             border-radius: 10px; 
         }
         .category-tabs { 
@@ -80,12 +146,12 @@
         }
         .icon-option:hover { 
             transform: scale(1.2); 
-            background: #fce7f3; 
+            background: var(--c-base-100); 
         }
         .icon-option.selected {
-            background: #fbcfe8;
+            background: var(--c-base-200);
             transform: scale(1.2);
-            box-shadow: 0 0 0 2px #f472b6;
+            box-shadow: 0 0 0 2px var(--c-base-400);
         }
         
         .mic-btn.recording {
@@ -102,8 +168,8 @@
             display: inline-block;
             width: 1rem; 
             height: 1rem;
-            border: 2px solid #fbcfe8; 
-            border-top-color: #f472b6;
+            border: 2px solid var(--c-base-200); 
+            border-top-color: var(--c-base-400);
             border-radius: 50%;
             animation: spin 0.6s linear infinite;
         }
@@ -157,6 +223,17 @@
         </div>
         
         <div class="flex gap-3 items-center">
+		
+		<div class="flex items-center gap-1.5 bg-white/80 px-3 py-2 rounded-full border border-pink-100 shadow-sm mr-2" id="themeSelectorUI">
+			<button onclick="changeTheme('sakura')" class="w-6 h-6 rounded-full bg-[#f472b6] border-2 border-white shadow hover:scale-110 transition" title="Sakura 🌸"></button>
+			<button onclick="changeTheme('matcha')" class="w-6 h-6 rounded-full bg-[#4ade80] border-2 border-white shadow hover:scale-110 transition" title="Matcha 🍵"></button>
+			<button onclick="changeTheme('blueberry')" class="w-6 h-6 rounded-full bg-[#60a5fa] border-2 border-white shadow hover:scale-110 transition" title="Blueberry 🫐"></button>
+			<button onclick="changeTheme('lavender')" class="w-6 h-6 rounded-full bg-[#c084fc] border-2 border-white shadow hover:scale-110 transition" title="Lavender 💜"></button>
+			<button onclick="changeTheme('peach')" class="w-6 h-6 rounded-full bg-[#fb923c] border-2 border-white shadow hover:scale-110 transition" title="Peach 🍑"></button>
+			<button onclick="changeTheme('lemon')" class="w-6 h-6 rounded-full bg-[#facc15] border-2 border-white shadow hover:scale-110 transition" title="Lemon 🍋"></button>
+			<button onclick="changeTheme('mint')" class="w-6 h-6 rounded-full bg-[#2dd4bf] border-2 border-white shadow hover:scale-110 transition" title="Mint 🧊"></button>
+		</div>
+		
             <div id="authButtons" class="flex gap-2">
                 <button id="loginBtn" class="bg-white border-2 border-pink-100 hover:bg-pink-50 text-gray-700 font-medium py-2 px-5 rounded-2xl shadow-sm transition-all flex items-center gap-3">
                     <img src="https://www.svgrepo.com/show/475656/google-color.svg" class="w-5 h-5"> เข้าสู่ระบบ
@@ -364,7 +441,7 @@
 	
 	<footer class="mt-4 pb-6 text-center w-full">
         <p class="text-pink-400/80 text-sm font-medium tracking-wide">
-            &copy; 2026 <span class="text-rose-400 font-bold">ArmmyNote v2.6</span> | Developed by <span class="text-pink-500 font-semibold">James IT</span>
+            &copy; 2026 <span class="text-rose-400 font-bold">ArmmyNote v2.7</span> | Developed by <span class="text-pink-500 font-semibold">James IT</span>
         </p>
     </footer>
 	
@@ -576,6 +653,28 @@
 </div>
 
 <script>
+
+	// ----------------------------------------------------
+    // ระบบจัดการ Theme แบบไดนามิก (เพิ่มใหม่)
+    // ----------------------------------------------------
+    const themeColors = {
+        sakura: '#f472b6', matcha: '#4ade80', blueberry: '#60a5fa',
+        lavender: '#c084fc', peach: '#fb923c', lemon: '#facc15', mint: '#2dd4bf'
+    };
+
+    function changeTheme(themeName) {
+        document.documentElement.setAttribute('data-theme', themeName);
+        localStorage.setItem('armmynote_theme', themeName);
+        
+        const metaTheme = document.querySelector('meta[name="theme-color"]');
+        if (metaTheme) metaTheme.setAttribute('content', themeColors[themeName]);
+    }
+
+    document.addEventListener('DOMContentLoaded', () => {
+        const savedTheme = localStorage.getItem('armmynote_theme') || 'sakura';
+        changeTheme(savedTheme);
+    });
+		
     // ----------------------------------------------------
     // ส่วนที่ 1: Service Worker สำหรับ PWA และ Clear Cache
     // ----------------------------------------------------
