@@ -364,7 +364,7 @@
 	
 	<footer class="mt-4 pb-6 text-center w-full">
         <p class="text-pink-400/80 text-sm font-medium tracking-wide">
-            &copy; 2026 <span class="text-rose-400 font-bold">ArmmyNote v2.5</span> | Developed by <span class="text-pink-500 font-semibold">James IT</span>
+            &copy; 2026 <span class="text-rose-400 font-bold">ArmmyNote v2.6</span> | Developed by <span class="text-pink-500 font-semibold">James IT</span>
         </p>
     </footer>
 	
@@ -1243,15 +1243,12 @@
 			const borderClass = `border-${color}-100`;
 			const textClass = `text-${color}-600`;
 			
-            // แปลงรหัสภาษาเป็นตัวพิมพ์ใหญ่เพื่อแสดงผล เช่น 'ja' -> 'JA'
-            const displayCode = lang.code.toUpperCase();
-			
 			const langDiv = document.createElement('div');
 			langDiv.className = `${bgClass} p-3 rounded-xl border ${borderClass} flex justify-between items-center gap-2`;
 			langDiv.innerHTML = `
 				<div class="flex-1 min-w-0">
 					<div class="flex items-center gap-2 flex-wrap mb-1">
-                        <span class="font-bold text-white bg-${color}-400 px-2 py-0.5 rounded-md text-xs tracking-wider shadow-sm">${displayCode}</span>
+                        <span class="font-medium text-lg">${lang.flag || '🌐'}</span>
 						<span class="font-semibold text-gray-800 text-sm">${escapeHtml(lang.name)}</span>
 					</div>
 					<div class="mt-1">
