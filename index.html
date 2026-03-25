@@ -276,10 +276,17 @@
                 </form>
             </div>
 
+            <!-- ส่วนแปลภาษาแบบไดนามิก -->
             <div id="translationToolContainer" class="paper-card p-6 hidden">
-                <h3 class="font-semibold text-lg flex items-center gap-2 text-sky-500 mb-3">
-                    <i class="fas fa-language"></i> แปลภาษา & ออกเสียง
-                </h3>
+                <div class="flex justify-between items-center mb-3">
+                    <h3 class="font-semibold text-lg flex items-center gap-2 text-sky-500">
+                        <i class="fas fa-language"></i> แปลภาษา & ออกเสียง
+                    </h3>
+                    <button id="addLangBtn" class="bg-green-100 hover:bg-green-200 text-green-700 text-sm px-3 py-1.5 rounded-full flex items-center gap-2 transition">
+                        <i class="fas fa-plus-circle"></i> เพิ่มภาษา
+                    </button>
+                </div>
+
                 <div class="relative mb-3 flex items-center">
                     <textarea id="autoTranslateInput" rows="2" class="w-full border-2 border-pink-100 rounded-2xl p-3 pr-24 bg-white focus:outline-none focus:border-pink-400 resize-none text-sm" placeholder="พิมพ์หรือพูดเพื่อแปล..."></textarea>
                     <div class="absolute right-3 top-3 flex gap-4">
@@ -291,25 +298,9 @@
                         </button>
                     </div>
                 </div>
-                <div class="space-y-2 mt-3 text-sm">
-                    <div class="bg-blue-50 p-3 rounded-xl border border-blue-100 relative min-h-[48px] flex items-center">
-                        <div class="flex-1 pr-12"><span class="font-medium text-blue-600">🇬🇧 </span><span id="autoEnResult">-</span></div>
-                        <button type="button" class="speaker-btn absolute right-3 text-blue-400 hover:text-blue-600 w-8 h-8 rounded-full" data-target="autoEnResult" data-lang="en-US" title="อ่านคำแปลภาษาอังกฤษ">
-                            <i class="fas fa-volume-up pointer-events-none"></i>
-                        </button>
-                    </div>
-                    <div class="bg-red-50 p-3 rounded-xl border border-red-100 relative min-h-[48px] flex items-center">
-                        <div class="flex-1 pr-12"><span class="font-medium text-red-600">🇨🇳 </span><span id="autoZhResult">-</span></div>
-                        <button type="button" class="speaker-btn absolute right-3 text-red-400 hover:text-red-600 w-8 h-8 rounded-full" data-target="autoZhResult" data-lang="zh-CN" title="อ่านคำแปลภาษาจีน">
-                            <i class="fas fa-volume-up pointer-events-none"></i>
-                        </button>
-                    </div>
-                    <div class="bg-green-50 p-3 rounded-xl border border-green-100 relative min-h-[48px] flex items-center">
-                        <div class="flex-1 pr-12"><span class="font-medium text-green-600">🇹🇭 </span><span id="autoThResult">-</span></div>
-                        <button type="button" class="speaker-btn absolute right-3 text-green-400 hover:text-green-600 w-8 h-8 rounded-full" data-target="autoThResult" data-lang="th-TH" title="อ่านคำแปลภาษาไทย">
-                            <i class="fas fa-volume-up pointer-events-none"></i>
-                        </button>
-                    </div>
+
+                <div id="translationLangsContainer" class="space-y-2 mt-3 text-sm">
+                    <!-- รายการภาษาจะถูกสร้างด้วย JavaScript -->
                 </div>
             </div>
         </div>
@@ -370,6 +361,13 @@
             <i class="fas fa-sync-alt pointer-events-none"></i> ล้างแคชและอัปเดตเวอร์ชัน
         </button>
     </div>
+	
+	<footer class="mt-4 pb-6 text-center w-full">
+        <p class="text-pink-400/80 text-sm font-medium tracking-wide">
+            &copy; 2026 <span class="text-rose-400 font-bold">ArmmyNote v2.5</span> | Developed by <span class="text-pink-500 font-semibold">James IT</span>
+        </p>
+    </footer>
+	
 </div>
 
 <div id="previewModal" class="modal-backdrop hidden fixed inset-0 bg-pink-900/60 backdrop-blur-md flex items-center justify-center z-[70] p-4">
@@ -457,13 +455,133 @@
     </div>
 </div>
 
+<!-- Modal สำหรับเพิ่มภาษาใหม่ (dropdown รหัสภาษา) -->
+<div id="addLangModal" class="modal-backdrop hidden fixed inset-0 bg-pink-900/40 backdrop-blur-sm flex items-center justify-center z-50 p-4">
+    <div class="bg-white rounded-[2rem] w-full max-w-sm p-6 shadow-2xl border-4 border-pink-50 relative fade-in-up">
+        <button id="closeAddLangModal" class="absolute top-4 right-4 text-gray-400 hover:text-pink-500 text-xl"><i class="fas fa-times"></i></button>
+        <h3 class="text-xl font-bold text-rose-500 mb-4 text-center">➕ เพิ่มภาษาใหม่</h3>
+        <div class="mb-6">
+            <label class="block text-sm font-medium text-gray-600 mb-1">รหัสภาษา (ISO)</label>
+            <select id="newLangCode" class="w-full border-2 border-pink-100 rounded-xl p-2 bg-white">
+                <option value="">-- เลือกรหัสภาษา --</option>
+                <option value="af" data-name="แอฟริคานส์">🇿🇦 แอฟริคานส์ (af)</option>
+                <option value="sq" data-name="แอลเบเนีย">🇦🇱 แอลเบเนีย (sq)</option>
+                <option value="am" data-name="อัมฮาริก">🇪🇹 อัมฮาริก (am)</option>
+                <option value="ar" data-name="อาหรับ">🇸🇦 อาหรับ (ar)</option>
+                <option value="hy" data-name="อาร์เมเนีย">🇦🇲 อาร์เมเนีย (hy)</option>
+                <option value="az" data-name="อาเซอร์ไบจาน">🇦🇿 อาเซอร์ไบจาน (az)</option>
+                <option value="eu" data-name="บาสก์">🇪🇸 บาสก์ (eu)</option>
+                <option value="be" data-name="เบลารุส">🇧🇾 เบลารุส (be)</option>
+                <option value="bn" data-name="เบงกาลี">🇧🇩 เบงกาลี (bn)</option>
+                <option value="bs" data-name="บอสเนีย">🇧🇦 บอสเนีย (bs)</option>
+                <option value="bg" data-name="บัลแกเรีย">🇧🇬 บัลแกเรีย (bg)</option>
+                <option value="ca" data-name="กาตาลัน">🇪🇸 กาตาลัน (ca)</option>
+                <option value="ceb" data-name="เซบัวโน">🇵🇭 เซบัวโน (ceb)</option>
+                <option value="ny" data-name="ชิเชวา">🇲🇼 ชิเชวา (ny)</option>
+                <option value="zh-CN" data-name="จีนตัวย่อ">🇨🇳 จีนตัวย่อ (zh-CN)</option>
+                <option value="zh-TW" data-name="จีนตัวเต็ม">🇹🇼 จีนตัวเต็ม (zh-TW)</option>
+                <option value="co" data-name="คอร์ซิกา">🇫🇷 คอร์ซิกา (co)</option>
+                <option value="hr" data-name="โครเอเชีย">🇭🇷 โครเอเชีย (hr)</option>
+                <option value="cs" data-name="เช็ก">🇨🇿 เช็ก (cs)</option>
+                <option value="da" data-name="เดนมาร์ก">🇩🇰 เดนมาร์ก (da)</option>
+                <option value="nl" data-name="ดัตช์">🇳🇱 ดัตช์ (nl)</option>
+                <option value="en" data-name="อังกฤษ">🇬🇧 อังกฤษ (en)</option>
+                <option value="eo" data-name="เอสเปรันโต">🏳️ เอสเปรันโต (eo)</option>
+                <option value="et" data-name="เอสโตเนีย">🇪🇪 เอสโตเนีย (et)</option>
+                <option value="tl" data-name="ฟิลิปปินส์">🇵🇭 ฟิลิปปินส์ (tl)</option>
+                <option value="fi" data-name="ฟินแลนด์">🇫🇮 ฟินแลนด์ (fi)</option>
+                <option value="fr" data-name="ฝรั่งเศส">🇫🇷 ฝรั่งเศส (fr)</option>
+                <option value="fy" data-name="ฟรีเชียน">🇳🇱 ฟรีเชียน (fy)</option>
+                <option value="gl" data-name="กาลิเซีย">🇪🇸 กาลิเซีย (gl)</option>
+                <option value="ka" data-name="จอร์เจีย">🇬🇪 จอร์เจีย (ka)</option>
+                <option value="de" data-name="เยอรมัน">🇩🇪 เยอรมัน (de)</option>
+                <option value="el" data-name="กรีก">🇬🇷 กรีก (el)</option>
+                <option value="gu" data-name="คุชราต">🇮🇳 คุชราต (gu)</option>
+                <option value="ht" data-name="เฮติ">🇭🇹 เฮติ (ht)</option>
+                <option value="ha" data-name="เฮาซา">🇳🇬 เฮาซา (ha)</option>
+                <option value="haw" data-name="ฮาวาย">🇺🇸 ฮาวาย (haw)</option>
+                <option value="iw" data-name="ฮิบรู">🇮🇱 ฮิบรู (iw)</option>
+                <option value="hi" data-name="ฮินดี">🇮🇳 ฮินดี (hi)</option>
+                <option value="hmn" data-name="ม้ง">🇱🇦 ม้ง (hmn)</option>
+                <option value="hu" data-name="ฮังการี">🇭🇺 ฮังการี (hu)</option>
+                <option value="is" data-name="ไอซ์แลนด์">🇮🇸 ไอซ์แลนด์ (is)</option>
+                <option value="ig" data-name="อิกโบ">🇳🇬 อิกโบ (ig)</option>
+                <option value="id" data-name="อินโดนีเซีย">🇮🇩 อินโดนีเซีย (id)</option>
+                <option value="ga" data-name="ไอริช">🇮🇪 ไอริช (ga)</option>
+                <option value="it" data-name="อิตาลี">🇮🇹 อิตาลี (it)</option>
+                <option value="ja" data-name="ญี่ปุ่น">🇯🇵 ญี่ปุ่น (ja)</option>
+                <option value="jw" data-name="ชวา">🇮🇩 ชวา (jw)</option>
+                <option value="kn" data-name="กันนาดา">🇮🇳 กันนาดา (kn)</option>
+                <option value="kk" data-name="คาซัค">🇰🇿 คาซัค (kk)</option>
+                <option value="km" data-name="เขมร">🇰🇭 เขมร (km)</option>
+                <option value="ko" data-name="เกาหลี">🇰🇷 เกาหลี (ko)</option>
+                <option value="ku" data-name="เคิร์ด">🇮🇶 เคิร์ด (ku)</option>
+                <option value="ky" data-name="คีร์กีซ">🇰🇬 คีร์กีซ (ky)</option>
+                <option value="lo" data-name="ลาว">🇱🇦 ลาว (lo)</option>
+                <option value="la" data-name="ละติน">🇻🇦 ละติน (la)</option>
+                <option value="lv" data-name="ลัตเวีย">🇱🇻 ลัตเวีย (lv)</option>
+                <option value="lt" data-name="ลิทัวเนีย">🇱🇹 ลิทัวเนีย (lt)</option>
+                <option value="lb" data-name="ลักเซมเบิร์ก">🇱🇺 ลักเซมเบิร์ก (lb)</option>
+                <option value="mk" data-name="มาซิโดเนีย">🇲🇰 มาซิโดเนีย (mk)</option>
+                <option value="mg" data-name="มาลากาซี">🇲🇬 มาลากาซี (mg)</option>
+                <option value="ms" data-name="มาเลย์">🇲🇾 มาเลย์ (ms)</option>
+                <option value="ml" data-name="มลายาลัม">🇮🇳 มลายาลัม (ml)</option>
+                <option value="mt" data-name="มอลตา">🇲🇹 มอลตา (mt)</option>
+                <option value="mi" data-name="เมารี">🇳🇿 เมารี (mi)</option>
+                <option value="mr" data-name="มราฐี">🇮🇳 มราฐี (mr)</option>
+                <option value="mn" data-name="มองโกเลีย">🇲🇳 มองโกเลีย (mn)</option>
+                <option value="my" data-name="พม่า">🇲🇲 พม่า (my)</option>
+                <option value="ne" data-name="เนปาล">🇳🇵 เนปาล (ne)</option>
+                <option value="no" data-name="นอร์เวย์">🇳🇴 นอร์เวย์ (no)</option>
+                <option value="ps" data-name="พัชโต">🇦🇫 พัชโต (ps)</option>
+                <option value="fa" data-name="เปอร์เซีย">🇮🇷 เปอร์เซีย (fa)</option>
+                <option value="pl" data-name="โปแลนด์">🇵🇱 โปแลนด์ (pl)</option>
+                <option value="pt" data-name="โปรตุเกส">🇵🇹 โปรตุเกส (pt)</option>
+                <option value="pa" data-name="ปัญจาบ">🇮🇳 ปัญจาบ (pa)</option>
+                <option value="ro" data-name="โรมาเนีย">🇷🇴 โรมาเนีย (ro)</option>
+                <option value="ru" data-name="รัสเซีย">🇷🇺 รัสเซีย (ru)</option>
+                <option value="sm" data-name="ซามัว">🇼🇸 ซามัว (sm)</option>
+                <option value="gd" data-name="󠁿สกอตส์เกลิก">🏴󠁧󠁢󠁳󠁣󠁴󠁿 สกอตส์เกลิก (gd)</option>
+                <option value="sr" data-name="เซอร์เบีย">🇷🇸 เซอร์เบีย (sr)</option>
+                <option value="st" data-name="เซโซโท">🇱🇸 เซโซโท (st)</option>
+                <option value="sn" data-name="โชนา">🇿🇼 โชนา (sn)</option>
+                <option value="sd" data-name="สินธี">🇵🇰 สินธี (sd)</option>
+                <option value="si" data-name="สิงหล">🇱🇰 สิงหล (si)</option>
+                <option value="sk" data-name="สโลวัก">🇸🇰 สโลวัก (sk)</option>
+                <option value="sl" data-name="สโลวีเนีย">🇸🇮 สโลวีเนีย (sl)</option>
+                <option value="so" data-name="โซมาลี">🇸🇴 โซมาลี (so)</option>
+                <option value="es" data-name="สเปน">🇪🇸 สเปน (es)</option>
+                <option value="su" data-name="ซุนดา">🇮🇩 ซุนดา (su)</option>
+                <option value="sw" data-name="สวาฮีลี">🇰🇪 สวาฮีลี (sw)</option>
+                <option value="sv" data-name="สวีเดน">🇸🇪 สวีเดน (sv)</option>
+                <option value="tg" data-name="ทาจิก">🇹🇯 ทาจิก (tg)</option>
+                <option value="ta" data-name="ทมิฬ">🇮🇳 ทมิฬ (ta)</option>
+                <option value="te" data-name="เตลูกู">🇮🇳 เตลูกู (te)</option>
+                <option value="th" data-name="ไทย">🇹🇭 ไทย (th)</option>
+                <option value="tr" data-name="ตุรกี">🇹🇷 ตุรกี (tr)</option>
+                <option value="uk" data-name="ยูเครน">🇺🇦 ยูเครน (uk)</option>
+                <option value="ur" data-name="อูรดู">🇵🇰 อูรดู (ur)</option>
+                <option value="uz" data-name="อุซเบก">🇺🇿 อุซเบก (uz)</option>
+                <option value="vi" data-name="เวียดนาม">🇻🇳 เวียดนาม (vi)</option>
+                <option value="cy" data-name="󠁷󠁬󠁳󠁿เวลส์">🏴󠁧󠁢󠁷󠁬󠁳󠁿 เวลส์ (cy)</option>
+                <option value="xh" data-name="โคซา">🇿🇦 โคซา (xh)</option>
+                <option value="yi" data-name="ยิดดิช">🇮🇱 ยิดดิช (yi)</option>
+                <option value="yo" data-name="โยรูบา">🇳🇬 โยรูบา (yo)</option>
+                <option value="zu" data-name="ซูลู">🇿🇦 ซูลู (zu)</option>
+             </select>
+            <p class="text-xs text-gray-400 mt-1">เลือกรหัสภาษาที่ต้องการเพิ่ม</p>
+        </div>
+        <button id="confirmAddLangBtn" class="btn-primary w-full py-2.5 text-center">เพิ่มภาษา</button>
+    </div>
+</div>
+
 <script>
     // ----------------------------------------------------
     // ส่วนที่ 1: Service Worker สำหรับ PWA และ Clear Cache
     // ----------------------------------------------------
     if ('serviceWorker' in navigator) {
         window.addEventListener('load', function() {
-            navigator.serviceWorker.register('sw.js').catch(function(err) {
+            navigator.serviceWorker.register('./sw.js', { scope: './' }).catch(function(err) {
                 console.log('Service Worker registration failed:', err);
             });
         });
@@ -568,9 +686,6 @@
 
     const translationToolContainer = document.getElementById('translationToolContainer');
     const autoTranslateInput = document.getElementById('autoTranslateInput');
-    const autoEnResult = document.getElementById('autoEnResult');
-    const autoZhResult = document.getElementById('autoZhResult');
-    const autoThResult = document.getElementById('autoThResult');
 
     const categoryTabsContainer = document.getElementById('categoryTabsContainer');
     const notesListContainer = document.getElementById('notesListContainer');
@@ -605,7 +720,6 @@
     
     const previewModal = document.getElementById('previewModal');
     const previewEditBtn = document.getElementById('previewEditBtn');
-
 
     // ----------------------------------------------------
     // ส่วนที่ 5: ฟังก์ชันพื้นฐานและการแก้ไขชื่อแอป
@@ -648,7 +762,6 @@
             appTitle.innerText = "My Notebook 🌸"; 
         }
     }
-
 
     // ----------------------------------------------------
     // ส่วนที่ 6: ตัวเลือกไอคอน 1,000+ แบบ (Icon Picker)
@@ -734,7 +847,6 @@
         globalIconPickerModal.classList.add('hidden');
     }
 
-
     // ----------------------------------------------------
     // ส่วนที่ 7: อัปโหลดรูปภาพและบีบอัด
     // ----------------------------------------------------
@@ -800,13 +912,10 @@
         triggerImageBtn.classList.remove('hidden');
     });
 
-
     // ----------------------------------------------------
     // ส่วนที่ 8: Global Event Delegation (ไมโครโฟน, ลำโพง, และหน้าต่าง Modal)
     // ----------------------------------------------------
     document.addEventListener('click', function(e) {
-        
-        // --- ส่วนของปุ่มลำโพง ---
         const speakerBtn = e.target.closest('.speaker-btn');
         if (speakerBtn) {
             e.preventDefault();
@@ -815,7 +924,6 @@
             return;
         }
 
-        // --- ส่วนของปุ่มไมโครโฟน ---
         const micBtn = e.target.closest('.mic-btn');
         if (micBtn) {
             e.preventDefault();
@@ -824,7 +932,6 @@
             return;
         }
         
-        // --- ส่วนของการปิด Modal หากคลิกที่พื้นหลัง ---
         if (e.target.id === 'previewModal') {
             closePreviewModal();
         }
@@ -837,14 +944,16 @@
         if (e.target.id === 'globalIconPickerModal') {
             document.getElementById('globalIconPickerModal').classList.add('hidden');
         }
+        if (e.target.id === 'addLangModal') {
+            document.getElementById('addLangModal').classList.add('hidden');
+        }
     });
     
-    // ตั้งค่าปุ่มกากบาทปิดในหน้าต่างต่างๆ
     document.getElementById('closePreviewBtn').addEventListener('click', closePreviewModal);
     document.getElementById('closeImageViewerBtn').addEventListener('click', closeImageViewer);
 
     function handleMicClick(btn) {
-        if (!SpeechRecognition) { 
+        if (!window.SpeechRecognition && !window.webkitSpeechRecognition) { 
             alert("เบราว์เซอร์นี้ไม่รองรับการพิมพ์ด้วยเสียงค่ะ 🥺"); 
             return; 
         }
@@ -867,6 +976,7 @@
 
         if (!targetInput) return;
 
+        const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
         const recognition = new SpeechRecognition();
         recognition.lang = 'th-TH'; 
         recognition.interimResults = false;
@@ -893,142 +1003,376 @@
         recognition.start();
     }
 
+    // แก้ไข handleSpeakerClick ให้รองรับภาษาจีน
     function handleSpeakerClick(btn) {
-        if (!window.speechSynthesis) {
-            alert("เบราว์เซอร์นี้ไม่รองรับการอ่านออกเสียงค่ะ 🥺");
-            return;
-        }
+		if (!window.speechSynthesis) {
+			alert("เบราว์เซอร์นี้ไม่รองรับการอ่านออกเสียงค่ะ 🥺");
+			return;
+		}
 
-        if (btn.classList.contains('speaking')) {
-            window.speechSynthesis.cancel();
-            btn.classList.remove('speaking');
-            return;
-        }
+		if (btn.classList.contains('speaking')) {
+			window.speechSynthesis.cancel();
+			btn.classList.remove('speaking');
+			return;
+		}
 
-        let textToSpeak = "";
-        
-        // อ่านจาก data-text ก่อน ถ้ามี
-        const textAttr = btn.getAttribute('data-text');
-        const targetId = btn.getAttribute('data-target');
+		let textToSpeak = "";
+		const textAttr = btn.getAttribute('data-text');
+		const targetId = btn.getAttribute('data-target');
 
-        if (textAttr) {
-            textToSpeak = decodeURIComponent(textAttr);
-        } else if (targetId) {
-            const targetEl = document.getElementById(targetId);
-            if (targetEl) {
-                textToSpeak = targetEl.tagName === 'INPUT' || targetEl.tagName === 'TEXTAREA' ? targetEl.value : targetEl.innerText;
-            }
-        }
+		if (textAttr) {
+			textToSpeak = decodeURIComponent(textAttr);
+		} else if (targetId) {
+			const targetEl = document.getElementById(targetId);
+			if (targetEl) {
+				textToSpeak = targetEl.tagName === 'INPUT' || targetEl.tagName === 'TEXTAREA' ? targetEl.value : targetEl.innerText;
+			}
+		}
 
-        if (!textToSpeak || textToSpeak.trim() === "" || textToSpeak === "-") return;
-        
-        window.speechSynthesis.cancel();
-        
-        document.querySelectorAll('.speaker-btn').forEach(function(b) {
-            b.classList.remove('speaking');
-        });
+		if (!textToSpeak || textToSpeak.trim() === "" || textToSpeak === "-") return;
+		
+		window.speechSynthesis.cancel();
+		
+		document.querySelectorAll('.speaker-btn').forEach(function(b) {
+			b.classList.remove('speaking');
+		});
 
-        const utterance = new SpeechSynthesisUtterance(textToSpeak);
-        
-        let lang = detectLanguageBasic(textToSpeak) === 'th' ? 'th-TH' : 'en-US';
-        if (btn.hasAttribute('data-lang')) {
-            lang = btn.getAttribute('data-lang');
-        }
-        utterance.lang = lang;
-        utterance.rate = 0.9;
-        
-        btn.classList.add('speaking');
-        
-        utterance.onend = function() { 
-            btn.classList.remove('speaking'); 
-        };
-        utterance.onerror = function() { 
-            btn.classList.remove('speaking'); 
-        };
-        
-        window.speechSynthesis.speak(utterance);
-    }
+		const utterance = new SpeechSynthesisUtterance(textToSpeak);
+		
+		// กำหนดภาษาโดยใช้ detectLanguageBasic และแปลงเป็นรหัสภาษา + ประเทศ
+		let lang = 'en-US';
+		const detected = detectLanguageBasic(textToSpeak);
+		switch (detected) {
+			case 'th': lang = 'th-TH'; break;
+			case 'zh': lang = 'zh-CN'; break;
+			case 'ja': lang = 'ja-JP'; break;
+			case 'ko': lang = 'ko-KR'; break;
+			case 'ru': lang = 'ru-RU'; break;
+			case 'ar': lang = 'ar-SA'; break;
+			case 'hi': lang = 'hi-IN'; break;
+			case 'pa': lang = 'pa-IN'; break;
+			case 'gu': lang = 'gu-IN'; break;
+			case 'or': lang = 'or-IN'; break;
+			case 'ta': lang = 'ta-IN'; break;
+			case 'te': lang = 'te-IN'; break;
+			case 'kn': lang = 'kn-IN'; break;
+			case 'ml': lang = 'ml-IN'; break;
+			case 'lo': lang = 'lo-LA'; break;
+			case 'my': lang = 'my-MM'; break;
+			case 'km': lang = 'km-KH'; break;
+			case 'vi': lang = 'vi-VN'; break;
+			case 'am': lang = 'am-ET'; break;
+			case 'ka': lang = 'ka-GE'; break;
+			case 'hy': lang = 'hy-AM'; break;
+			default: lang = 'en-US';
+		}
+		// ถ้ามี data-lang ให้ใช้ค่านั้นแทน (เช่นปุ่มในส่วนแปลภาษา)
+		if (btn.hasAttribute('data-lang')) {
+			lang = btn.getAttribute('data-lang');
+		}
+		utterance.lang = lang;
+		utterance.rate = 0.9;
+		
+		btn.classList.add('speaking');
+		
+		utterance.onend = function() { 
+			btn.classList.remove('speaking'); 
+		};
+		utterance.onerror = function() { 
+			btn.classList.remove('speaking'); 
+		};
+		
+		window.speechSynthesis.speak(utterance);
+	}
 
-    // ฟังก์ชัน auto-resize สำหรับ textarea
     function autoResizeTextarea(textarea) {
         textarea.style.height = 'auto';
         textarea.style.height = textarea.scrollHeight + 'px';
     }
 
-
     // ----------------------------------------------------
     // ส่วนที่ 9: ฟังก์ชันแปลภาษา Google Translate
     // ----------------------------------------------------
     function detectLanguageBasic(text) {
-        if (/[\u0E00-\u0E7F]/.test(text)) return 'th';
-        if (/[\u4E00-\u9FFF]/.test(text)) return 'zh'; 
-        return 'en';
-    }
+		// ตรวจสอบภาษาญี่ปุ่น (Hiragana, Katakana) ก่อน เพื่อไม่ให้ Kanji ถูกตรวจจับเป็นจีน
+		if (/[\u3040-\u30FF\u31F0-\u31FF]/.test(text)) return 'ja';
+		// ไทย
+		if (/[\u0E00-\u0E7F]/.test(text)) return 'th';
+		// จีน (Kanji ที่เหลือ)
+		if (/[\u4E00-\u9FFF]/.test(text)) return 'zh';
+		// เกาหลี
+		if (/[\uAC00-\uD7AF]/.test(text)) return 'ko';
+		// รัสเซีย
+		if (/[\u0400-\u04FF]/.test(text)) return 'ru';
+		// อาหรับ
+		if (/[\u0600-\u06FF]/.test(text)) return 'ar';
+		// ฮินดี
+		if (/[\u0900-\u097F]/.test(text)) return 'hi';
+		// ปัญจาบ
+		if (/[\u0A00-\u0A7F]/.test(text)) return 'pa';
+		// คุชราต
+		if (/[\u0A80-\u0AFF]/.test(text)) return 'gu';
+		// โอริยา
+		if (/[\u0B00-\u0B7F]/.test(text)) return 'or';
+		// ทมิฬ
+		if (/[\u0B80-\u0BFF]/.test(text)) return 'ta';
+		// เตลูกู
+		if (/[\u0C00-\u0C7F]/.test(text)) return 'te';
+		// กันนาดา
+		if (/[\u0C80-\u0CFF]/.test(text)) return 'kn';
+		// มลยาฬัม
+		if (/[\u0D00-\u0D7F]/.test(text)) return 'ml';
+		// ลาว
+		if (/[\u0E80-\u0EFF]/.test(text)) return 'lo';
+		// พม่า
+		if (/[\u1000-\u109F]/.test(text)) return 'my';
+		// เขมร
+		if (/[\u1780-\u17FF]/.test(text)) return 'km';
+		// อัมฮาริก
+		if (/[\u1200-\u137F]/.test(text)) return 'am';
+		// จอร์เจีย
+		if (/[\u10A0-\u10FF]/.test(text)) return 'ka';
+		// อาร์เมเนีย
+		if (/[\u0530-\u058F]/.test(text)) return 'hy';
+		// เวียดนาม (อักษรละตินเสริม)
+		if (/[\u1E00-\u1EFF]/.test(text)) return 'vi';
+		// ภาษาอื่นที่ใช้อักษรละติน
+		return 'en';
+	}
     
     async function translateText(text, srcLang, tgtLang) {
-        if (!text) return "";
-        const key = `${srcLang}|${tgtLang}|${text}`;
-        if (translationCache[key]) return translationCache[key];
-        
-        const src = srcLang === 'zh' ? 'zh-CN' : srcLang; 
-        const tgt = tgtLang === 'zh' ? 'zh-CN' : tgtLang;
-        
-        const url = `https://translate.googleapis.com/translate_a/single?client=gtx&sl=${src}&tl=${tgt}&dt=t&q=${encodeURIComponent(text)}`;
-        
-        try {
-            const res = await fetch(url); 
-            const data = await res.json();
-            if (data && data[0]) {
-                let trans = data[0].map(item => item[0]).join('');
-                if (trans === text && src !== tgt) trans = null;
-                if (trans) translationCache[key] = trans; 
-                return trans || "";
-            }
-            return "";
-        } catch(e) { return ""; }
-    }
+        if (!text) return "";
+        const key = `${srcLang}|${tgtLang}|${text}`;
+        if (translationCache[key]) return translationCache[key];
+        
+        let src = srcLang;
+        let tgt = tgtLang;
+        if (srcLang === 'zh') src = 'zh-CN';
+        if (tgtLang === 'zh') tgt = 'zh-CN';
+        
+        // ส่งพารามิเตอร์ sl=auto เพื่อให้ Google ตรวจจับภาษาต้นทางอัตโนมัติ
+        const url = `https://translate.googleapis.com/translate_a/single?client=gtx&sl=${src}&tl=${tgt}&dt=t&q=${encodeURIComponent(text)}`;
+        
+        try {
+            const res = await fetch(url); 
+            const data = await res.json();
+            if (data && data[0]) {
+                let trans = data[0].map(item => item[0]).join('');
+                if (trans) translationCache[key] = trans; 
+                return trans || "";
+            }
+            return "";
+        } catch(e) { return ""; }
+    }
     
-    async function autoTranslate() {
-        const raw = autoTranslateInput.value.trim();
-        if (!raw) { 
-            autoEnResult.innerText = "-"; 
-            autoZhResult.innerText = "-"; 
-            autoThResult.innerText = "-"; 
-            return; 
-        }
-        
-        const spinner = '<span class="loading-spinner"></span>';
-        autoEnResult.innerHTML = spinner; 
-        autoZhResult.innerHTML = spinner; 
-        autoThResult.innerHTML = spinner;
-        
-        const detected = detectLanguageBasic(raw);
-        let en = "", zh = "", th = "";
-        
-        if (detected === 'th') { 
-            th = raw; 
-            en = await translateText(raw, 'th', 'en'); 
-            zh = await translateText(raw, 'th', 'zh'); 
-        } else if (detected === 'en') { 
-            en = raw; 
-            th = await translateText(raw, 'en', 'th'); 
-            zh = await translateText(raw, 'en', 'zh'); 
-        } else { 
-            zh = raw; 
-            th = await translateText(raw, 'zh', 'th'); 
-            en = await translateText(raw, 'zh', 'en'); 
-        }
-        
-        autoEnResult.innerText = en || "-"; 
-        autoZhResult.innerText = zh || "-"; 
-        autoThResult.innerText = th || "-";
+    // ตัวแปรสำหรับเก็บรายการภาษาแบบไดนามิก
+    let translationLangs = [
+		{ name: "อังกฤษ", code: "en", flag: "🇬🇧" },
+		{ name: "ไทย", code: "th", flag: "🇹🇭" },
+		{ name: "จีนตัวย่อ", code: "zh-CN", flag: "🇨🇳" },
+		{ name: "ญี่ปุ่น", code: "ja", flag: "🇯🇵" },
+		{ name: "เกาหลี", code: "ko", flag: "🇰🇷" },
+		{ name: "ฝรั่งเศส", code: "fr", flag: "🇫🇷" },
+		{ name: "เยอรมัน", code: "de", flag: "🇩🇪" },
+		{ name: "สเปน", code: "es", flag: "🇪🇸" },
+		{ name: "อิตาลี", code: "it", flag: "🇮🇹" },
+		{ name: "รัสเซีย", code: "ru", flag: "🇷🇺" },
+		{ name: "อาหรับ", code: "ar", flag: "🇸🇦" },
+		{ name: "เวียดนาม", code: "vi", flag: "🇻🇳" },
+		{ name: "โปรตุเกส", code: "pt", flag: "🇵🇹" },
+		{ name: "ดัตช์", code: "nl", flag: "🇳🇱" },
+		{ name: "โปแลนด์", code: "pl", flag: "🇵🇱" },
+		{ name: "ตุรกี", code: "tr", flag: "🇹🇷" },
+		{ name: "สวีเดน", code: "sv", flag: "🇸🇪" },
+		{ name: "เดนมาร์ก", code: "da", flag: "🇩🇰" },
+		{ name: "นอร์เวย์", code: "no", flag: "🇳🇴" },
+		{ name: "ฟินแลนด์", code: "fi", flag: "🇫🇮" }
+	];
+
+    function loadTranslationLangs() {
+        const saved = localStorage.getItem('notebook_translation_langs');
+        if (saved) {
+            try {
+                const parsed = JSON.parse(saved);
+                translationLangs = parsed.map(item => {
+                    // ดึงชื่อภาษาที่บันทึกไว้ หรือหาจากแท็ก <select> เผื่อกรณีข้อมูลเก่าในแคชไม่มีชื่อ
+                    let langName = item.name;
+                    if (!langName) {
+                        const option = document.querySelector(`#newLangCode option[value="${item.code}"]`);
+                        langName = option ? option.getAttribute('data-name') : item.code;
+                    }
+
+                    return {
+                        code: item.code,
+                        name: langName, // ✨ แก้ไขตรงนี้ให้จำชื่อภาษาด้วย
+                        flag: item.flag || getFlagEmoji(item.code)
+                    };
+                });
+            } catch(e) {}
+        }
+        renderTranslationLangs();
+        autoTranslate();
+    }
+
+    function saveTranslationLangs() {
+        localStorage.setItem('notebook_translation_langs', JSON.stringify(translationLangs));
     }
+
+    function getFlagEmoji(code) {
+		const map = {
+			'en': '🇬🇧', 'th': '🇹🇭', 'zh-CN': '🇨🇳', 'ja': '🇯🇵', 'ko': '🇰🇷',
+			'fr': '🇫🇷', 'de': '🇩🇪', 'es': '🇪🇸', 'it': '🇮🇹', 'ru': '🇷🇺',
+			'ar': '🇸🇦', 'vi': '🇻🇳', 'hi': '🇮🇳', 'pt': '🇵🇹', 'nl': '🇳🇱',
+			'pl': '🇵🇱', 'tr': '🇹🇷', 'sv': '🇸🇪', 'da': '🇩🇰', 'no': '🇳🇴',
+			'fi': '🇫🇮', 'el': '🇬🇷', 'he': '🇮🇱', 'hu': '🇭🇺', 'cs': '🇨🇿',
+			'ro': '🇷🇴', 'uk': '🇺🇦', 'id': '🇮🇩', 'ms': '🇲🇾', 'tl': '🇵🇭'
+		};
+		return map[code] || '🌐';
+	}
+
+    // แทนที่ฟังก์ชัน renderTranslationLangs ทั้งหมดด้วยโค้ดด้านล่าง
+	function renderTranslationLangs() {
+		const container = document.getElementById('translationLangsContainer');
+		if (!container) return;
+		
+		container.innerHTML = '';
+		translationLangs.forEach((lang, idx) => {
+			const bgColors = ['blue', 'red', 'green', 'purple', 'orange', 'teal', 'cyan', 'yellow'];
+			const color = bgColors[idx % bgColors.length];
+			const bgClass = `bg-${color}-50`;
+			const borderClass = `border-${color}-100`;
+			const textClass = `text-${color}-600`;
+			
+            // แปลงรหัสภาษาเป็นตัวพิมพ์ใหญ่เพื่อแสดงผล เช่น 'ja' -> 'JA'
+            const displayCode = lang.code.toUpperCase();
+			
+			const langDiv = document.createElement('div');
+			langDiv.className = `${bgClass} p-3 rounded-xl border ${borderClass} flex justify-between items-center gap-2`;
+			langDiv.innerHTML = `
+				<div class="flex-1 min-w-0">
+					<div class="flex items-center gap-2 flex-wrap mb-1">
+                        <span class="font-bold text-white bg-${color}-400 px-2 py-0.5 rounded-md text-xs tracking-wider shadow-sm">${displayCode}</span>
+						<span class="font-semibold text-gray-800 text-sm">${escapeHtml(lang.name)}</span>
+					</div>
+					<div class="mt-1">
+						<span id="trans_result_${idx}" class="text-gray-700 text-sm">-</span>
+					</div>
+				</div>
+				<div class="flex items-center gap-1">
+					<button type="button" class="copy-btn ${textClass} hover:${textClass} w-8 h-8 rounded-full transition-colors" data-index="${idx}" title="คัดลอกคำแปล">
+						<i class="fas fa-copy pointer-events-none"></i>
+					</button>
+					<button type="button" class="speaker-btn ${textClass} hover:${textClass} w-8 h-8 rounded-full" data-text="" data-lang="${lang.code}" title="อ่านคำแปลภาษานี้">
+						<i class="fas fa-volume-up pointer-events-none"></i>
+					</button>
+					<button type="button" class="remove-lang-btn text-gray-400 hover:text-red-500 w-8 h-8 rounded-full" data-index="${idx}" title="ลบภาษานี้">
+						<i class="fas fa-trash-alt pointer-events-none text-sm"></i>
+					</button>
+				</div>
+			`;
+			
+			// ปุ่มคัดลอก
+			const copyBtn = langDiv.querySelector('.copy-btn');
+			if (copyBtn) {
+				copyBtn.addEventListener('click', function(e) {
+					e.stopPropagation();
+					const idx = parseInt(this.getAttribute('data-index'));
+					const resultSpan = document.getElementById(`trans_result_${idx}`);
+					if (resultSpan && resultSpan.innerText && resultSpan.innerText !== '-') {
+						const textToCopy = resultSpan.innerText;
+						navigator.clipboard.writeText(textToCopy).catch(err => console.error('Copy failed', err));
+					}
+				});
+			}
+			
+			// ปุ่มลบภาษา
+			const removeBtn = langDiv.querySelector('.remove-lang-btn');
+			if (removeBtn) {
+				removeBtn.addEventListener('click', function(e) {
+					e.stopPropagation();
+					const idx = parseInt(this.getAttribute('data-index'));
+					if (translationLangs.length <= 1) {
+						alert("ต้องมีอย่างน้อย 1 ภาษานะคะ 🥺");
+						return;
+					}
+					translationLangs.splice(idx, 1);
+					saveTranslationLangs();
+					renderTranslationLangs();
+					autoTranslate();
+				});
+			}
+			
+			container.appendChild(langDiv);
+		});
+	}
+
+    function openAddLangModal() {
+        document.getElementById('addLangModal').classList.remove('hidden');
+        document.getElementById('newLangName').value = '';
+        document.getElementById('newLangCode').value = '';
+    }
+
+    function addNewLanguage() {
+		const selectEl = document.getElementById('newLangCode');
+		const selectedOption = selectEl.options[selectEl.selectedIndex];
+		const code = selectEl.value;
+		if (!code) {
+			alert("กรุณาเลือกรหัสภาษา");
+			return;
+		}
+		const name = selectedOption.getAttribute('data-name') || getLanguageName(code);
+		
+		if (translationLangs.some(l => l.code === code)) {
+			alert("มีภาษานี้อยู่แล้วในรายการ");
+			return;
+		}
+		
+		translationLangs.push({ code: code, name: name, flag: getFlagEmoji(code) });
+		saveTranslationLangs();
+		renderTranslationLangs();
+		document.getElementById('addLangModal').classList.add('hidden');
+		autoTranslate();
+	}
+
+    async function autoTranslate() {
+        const raw = autoTranslateInput.value.trim();
+        if (!raw) {
+            translationLangs.forEach((lang, idx) => {
+                const resultSpan = document.getElementById(`trans_result_${idx}`);
+                if (resultSpan) resultSpan.innerText = "-";
+                const speakerBtn = document.querySelector(`#translationLangsContainer .speaker-btn[data-lang="${lang.code}"]`);
+                if (speakerBtn) speakerBtn.setAttribute('data-text', encodeURIComponent(""));
+            });
+            return;
+        }
+        
+        translationLangs.forEach((lang, idx) => {
+            const resultSpan = document.getElementById(`trans_result_${idx}`);
+            if (resultSpan) resultSpan.innerHTML = '<span class="loading-spinner"></span>';
+        });
+        
+        // กำหนดเป็น 'auto' เพื่อรองรับการพิมพ์ทุกภาษาบนโลกที่ Google รู้จัก 🌍
+        const srcLang = 'auto'; 
+        
+        for (let i = 0; i < translationLangs.length; i++) {
+            const lang = translationLangs[i];
+            let translatedText = await translateText(raw, srcLang, lang.code);
+            
+            const resultSpan = document.getElementById(`trans_result_${i}`);
+            if (resultSpan) {
+                resultSpan.innerText = translatedText || "-";
+            }
+            const speakerBtn = document.querySelector(`#translationLangsContainer .speaker-btn[data-lang="${lang.code}"]`);
+            if (speakerBtn) {
+                speakerBtn.setAttribute('data-text', encodeURIComponent(translatedText || ""));
+            }
+        }
+    }
 
     autoTranslateInput.addEventListener('input', function() {
         if (autoTranslateDebounce) clearTimeout(autoTranslateDebounce);
         autoTranslateDebounce = setTimeout(autoTranslate, 500);
     });
-
 
     // ----------------------------------------------------
     // ส่วนที่ 10: แบบฟอร์มเพิ่มหัวข้อย่อย (Dynamic Fields)
@@ -1130,7 +1474,6 @@
             dynamicFieldsContainer.appendChild(createFieldRow("รายละเอียด", "", "✨", "pink"));
         }
     }
-
 
     // ----------------------------------------------------
     // ส่วนที่ 11: การทำงานของ View Modes และการแสดงการ์ด
@@ -1408,7 +1751,6 @@
                     const fieldBox = document.createElement('div');
                     fieldBox.className = "bg-gray-50/50 p-4 rounded-xl border border-gray-100 relative pr-14";
                     
-                    // อ่านเฉพาะรายละเอียดของช่อง (ข้าม Label)
                     const valueTextForSpeaker = encodeURIComponent(f.value || "");
                     
                     fieldBox.innerHTML = `
@@ -1442,7 +1784,6 @@
         previewModal.classList.add('hidden');
         window.speechSynthesis.cancel(); 
     }
-
 
     // ----------------------------------------------------
     // ส่วนที่ 12: การจัดการฟอร์มแก้ไขและบันทึก
@@ -1566,7 +1907,6 @@
             submitBtn.disabled = false;
         }
     });
-
 
     // ----------------------------------------------------
     // ส่วนที่ 13: การจัดการสมุดหมวดหมู่และการจำสมุดล่าสุด
@@ -1824,7 +2164,6 @@
         }
     }
 
-
     // ----------------------------------------------------
     // ส่วนที่ 14: Authentication และการโหลดเริ่มต้น
     // ----------------------------------------------------
@@ -1896,6 +2235,13 @@
         auth.signOut();
     });
     
+    // ปุ่มเพิ่มภาษา
+    document.getElementById('addLangBtn')?.addEventListener('click', openAddLangModal);
+    document.getElementById('closeAddLangModal')?.addEventListener('click', () => {
+        document.getElementById('addLangModal').classList.add('hidden');
+    });
+    document.getElementById('confirmAddLangBtn')?.addEventListener('click', addNewLanguage);
+    
     auth.onAuthStateChanged(updateUI);
     
     window.addEventListener('DOMContentLoaded', () => {
@@ -1908,6 +2254,7 @@
                 this.style.height = this.scrollHeight + 'px'; 
             });
         }
+        loadTranslationLangs();
     });
 
 </script>

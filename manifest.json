@@ -1,7 +1,9 @@
 {
-  "name": "My Cute Notebook 🌸",
-  "short_name": "ArmmyNote",
+  "id": "armmynote-app-unique",
+  "scope": "./",
   "start_url": "./index.html",
+  "name": "ArmmyNote 🌸",
+  "short_name": "ArmmyNote",
   "display": "standalone",
   "background_color": "#fce7f3",
   "theme_color": "#f472b6",
